@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.message.EttpMessage;
 import com.etterna.multi.socket.message.IncomingMessageHandler;
@@ -16,13 +15,9 @@ public class LoginMessageHandler extends IncomingMessageHandler {
 	@Autowired
 	private SessionService sessions;
 	
-	public static LoginMessage readPayload(EttpMessage msg) {
-		return Jackson.fromJsonString(Jackson.toJsonString(msg.getPayload()), LoginMessage.class);
-	}
-
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
-		LoginMessage msg = readPayload(message);
+		LoginMessage msg = readPayload(message, LoginMessage.class);
 		
 		
 		boolean success = sessions.createLoginSession(msg.getUser(), msg.getPass(), session);
