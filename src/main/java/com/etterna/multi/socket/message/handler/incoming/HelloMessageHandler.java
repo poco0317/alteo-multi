@@ -6,11 +6,11 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.message.EttpMessage;
-import com.etterna.multi.socket.message.IncomingMessageHandler;
+import com.etterna.multi.socket.message.EttpMessageHandler;
 import com.etterna.multi.socket.payload.incoming.HelloMessage;
 
 @Component
-public class HelloMessageHandler extends IncomingMessageHandler {
+public class HelloMessageHandler extends EttpMessageHandler {
 	
 	private static final String SERVER_NAME = "AltEOMulti";
 	private static final int SERVER_VERSION = 5;

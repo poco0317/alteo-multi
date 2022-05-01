@@ -5,7 +5,7 @@ import com.etterna.multi.socket.message.handler.incoming.*;
 /**
  * Messages sent by the client to the server
  */
-public enum IncomingMessageType {
+public enum EttpMessageType {
 	
 	LOGIN(LoginMessageHandler.class),
 	PING(PingMessageHandler.class),
@@ -29,17 +29,17 @@ public enum IncomingMessageType {
 	LOGOUT(LogoutMessageHandler.class),
 	HELLO(HelloMessageHandler.class);
 	
-	private IncomingMessageType() {
+	private EttpMessageType() {
 		linkedClass = null;
 	}
 	
-	private IncomingMessageType(Class<? extends IncomingMessageHandler> cla) {
+	private EttpMessageType(Class<? extends EttpMessageHandler> cla) {
 		linkedClass = cla;
 	}
 	
-	private Class<? extends IncomingMessageHandler> linkedClass;
+	private Class<? extends EttpMessageHandler> linkedClass;
 	
-	public Class<? extends IncomingMessageHandler> getLinkedClass() {
+	public Class<? extends EttpMessageHandler> getLinkedClass() {
 		return linkedClass;
 	}
 

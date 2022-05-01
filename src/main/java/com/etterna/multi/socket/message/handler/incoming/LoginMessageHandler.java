@@ -6,11 +6,11 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.message.EttpMessage;
-import com.etterna.multi.socket.message.IncomingMessageHandler;
+import com.etterna.multi.socket.message.EttpMessageHandler;
 import com.etterna.multi.socket.payload.incoming.LoginMessage;
 
 @Component
-public class LoginMessageHandler extends IncomingMessageHandler {
+public class LoginMessageHandler extends EttpMessageHandler {
 	
 	@Autowired
 	private SessionService sessions;

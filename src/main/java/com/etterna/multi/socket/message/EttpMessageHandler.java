@@ -7,9 +7,9 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.amazonaws.util.json.Jackson;
 
-public abstract class IncomingMessageHandler {
+public abstract class EttpMessageHandler {
 	
-	protected static final Logger m_logger = LoggerFactory.getLogger(IncomingMessageHandler.class);
+	protected static final Logger m_logger = LoggerFactory.getLogger(EttpMessageHandler.class);
 	
 	public static <T> T readPayload(EttpMessage msg, Class<T> clz) {
 		return Jackson.fromJsonString(Jackson.toJsonString(msg.getPayload()), clz);

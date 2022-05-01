@@ -14,8 +14,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.message.EttpMessage;
-import com.etterna.multi.socket.message.IncomingMessageHandler;
-import com.etterna.multi.socket.message.IncomingMessageType;
+import com.etterna.multi.socket.message.EttpMessageHandler;
+import com.etterna.multi.socket.message.EttpMessageType;
 import com.etterna.multi.socket.message.handler.incoming.HelloMessageHandler;
 
 @Component
@@ -44,7 +44,7 @@ public class SocketTextHandler extends TextWebSocketHandler {
 		}
 		
 		try {
-			Class<? extends IncomingMessageHandler> handlerClass = IncomingMessageType.valueOf(ettpMessage.getType().toUpperCase()).getLinkedClass();
+			Class<? extends EttpMessageHandler> handlerClass = EttpMessageType.valueOf(ettpMessage.getType().toUpperCase()).getLinkedClass();
 			m_logger.debug("Handling incoming message type: {}", ettpMessage.getType());
 			ctx.getBean(handlerClass).handle(session, ettpMessage);
 		} catch (Exception e) {
