@@ -1,6 +1,7 @@
 package com.etterna.multi.data.state;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Lobby {
 
@@ -12,15 +13,27 @@ public class Lobby {
 	private boolean freepick;
 	private boolean playing;
 	private Chart chart;
-	private List<String> commonpacks;
+	private Set<String> commonpacks = new HashSet<>();
 	private SelectionMode selectionmode;
 	private boolean countdown;
 	private boolean inCountdown;
 	private int timer;
 	
 	private UserSession owner;
-	private List<UserSession> operators;
-	private List<UserSession> players;
+	private Set<UserSession> operators = new HashSet<>();
+	private Set<UserSession> players = new HashSet<>();
+	
+	public boolean canSelect(UserSession user) {
+		return freepick || isOwner(user) || isOperator(user); 
+	}
+	
+	public boolean isOperator(UserSession user) {
+		return operators.contains(user);
+	}
+	
+	public boolean isOwner(UserSession user) {
+		return owner.equals(user);
+	}
 	
 	public String getName() {
 		return name;
@@ -64,12 +77,6 @@ public class Lobby {
 	public void setChart(Chart chart) {
 		this.chart = chart;
 	}
-	public List<String> getCommonpacks() {
-		return commonpacks;
-	}
-	public void setCommonpacks(List<String> commonpacks) {
-		this.commonpacks = commonpacks;
-	}
 	public SelectionMode getSelectionmode() {
 		return selectionmode;
 	}
@@ -100,16 +107,28 @@ public class Lobby {
 	public void setOwner(UserSession owner) {
 		this.owner = owner;
 	}
-	public List<UserSession> getOperators() {
+
+	public Set<String> getCommonpacks() {
+		return commonpacks;
+	}
+
+	public void setCommonpacks(Set<String> commonpacks) {
+		this.commonpacks = commonpacks;
+	}
+
+	public Set<UserSession> getOperators() {
 		return operators;
 	}
-	public void setOperators(List<UserSession> operators) {
+
+	public void setOperators(Set<UserSession> operators) {
 		this.operators = operators;
 	}
-	public List<UserSession> getPlayers() {
+
+	public Set<UserSession> getPlayers() {
 		return players;
 	}
-	public void setPlayers(List<UserSession> players) {
+
+	public void setPlayers(Set<UserSession> players) {
 		this.players = players;
 	}
 	
