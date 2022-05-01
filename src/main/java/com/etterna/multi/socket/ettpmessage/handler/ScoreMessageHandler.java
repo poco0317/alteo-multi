@@ -5,14 +5,12 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
-import com.etterna.multi.socket.ettpmessage.payload.ScoreMessage;
 
 @Component
 public class ScoreMessageHandler extends EttpMessageHandler {
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
-		ScoreMessage msg = readPayload(message, ScoreMessage.class);
 	}
 
 }
