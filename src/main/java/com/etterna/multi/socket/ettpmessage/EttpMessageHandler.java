@@ -2,10 +2,12 @@ package com.etterna.multi.socket.ettpmessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.amazonaws.util.json.Jackson;
+import com.etterna.multi.services.SessionService;
 
 /**
  * Base handler for all EttpMessages.
@@ -16,6 +18,9 @@ import com.amazonaws.util.json.Jackson;
 public abstract class EttpMessageHandler {
 	
 	protected static final Logger m_logger = LoggerFactory.getLogger(EttpMessageHandler.class);
+	
+	@Autowired
+	protected SessionService sessions;
 	
 	public static <T> T readPayload(EttpMessage msg, Class<T> clz) {
 		return Jackson.fromJsonString(Jackson.toJsonString(msg.getPayload()), clz);

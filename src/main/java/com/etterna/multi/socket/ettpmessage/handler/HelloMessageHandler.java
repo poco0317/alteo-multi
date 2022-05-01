@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.payload.HelloMessage;
@@ -14,9 +13,6 @@ public class HelloMessageHandler extends EttpMessageHandler {
 	
 	private static final String SERVER_NAME = "AltEOMulti";
 	private static final int SERVER_VERSION = 5;
-	
-	@Autowired
-	private SessionService sessions;
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
