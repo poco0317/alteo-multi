@@ -7,6 +7,12 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.amazonaws.util.json.Jackson;
 
+/**
+ * Base handler for all EttpMessages.
+ * Responsible for dealing with and then responding to any given EttpMessage.
+ * May be brought into another class as a dependency (all implementations of this should be Components)
+ * The dependency can then be used for special invoke purposes such as the Hello message on connect instead of responding to a Hello input
+ */
 public abstract class EttpMessageHandler {
 	
 	protected static final Logger m_logger = LoggerFactory.getLogger(EttpMessageHandler.class);

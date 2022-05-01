@@ -3,7 +3,8 @@ package com.etterna.multi.socket.ettpmessage;
 import com.etterna.multi.socket.ettpmessage.handler.*;
 
 /**
- * Messages sent by the client to the server
+ * Messages sent by the client to the server.
+ * Helps map input type strings to message handlers
  */
 public enum EttpMessageType {
 	
