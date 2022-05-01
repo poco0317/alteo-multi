@@ -13,10 +13,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.services.SessionService;
-import com.etterna.multi.socket.message.EttpMessage;
-import com.etterna.multi.socket.message.EttpMessageHandler;
-import com.etterna.multi.socket.message.EttpMessageType;
-import com.etterna.multi.socket.message.handler.incoming.HelloMessageHandler;
+import com.etterna.multi.socket.ettpmessage.EttpMessage;
+import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
+import com.etterna.multi.socket.ettpmessage.EttpMessageType;
+import com.etterna.multi.socket.ettpmessage.handler.HelloMessageHandler;
 
 @Component
 @Scope("prototype")

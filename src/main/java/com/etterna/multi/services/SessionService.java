@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.UserSession;
-import com.etterna.multi.socket.payload.incoming.HelloMessage;
+import com.etterna.multi.socket.ettpmessage.payload.HelloMessage;
 
 @Service
 public class SessionService {
