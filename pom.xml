@@ -13,7 +13,7 @@
 	<artifactId>multi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>alteo-multi</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Multiplayer Server for Alternative EtternaOnline Services</description>
 	
 	<properties>
 		<java.version>1.8</java.version>
@@ -42,23 +42,8 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-messaging</artifactId>
-		</dependency>
-	
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-		</dependency>
-	
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
 		<dependency>
