@@ -1,5 +1,8 @@
 package com.etterna.multi.data.state;
 
+import com.etterna.multi.socket.ettpmessage.payload.SelectChartMessage;
+import com.etterna.multi.socket.ettpmessage.payload.StartChartMessage;
+
 public class Chart {
 	
 	private String title;
@@ -7,10 +10,33 @@ public class Chart {
 	private String artist;
 	private String filehash;
 	private String pickedBy;
-	private double msd;
-	private double meter;
+	private String difficulty;
+	private Double meter;
 	private String chartkey;
-	private double rate;
+	private Double rate;
+	
+	public Chart() {}
+	public Chart(SelectChartMessage msg) {
+		title = msg.getTitle();
+		subtitle = msg.getSubtitle();
+		artist = msg.getArtist();
+		filehash = msg.getFilehash();
+		difficulty = msg.getDifficulty();
+		meter = msg.getMeter();
+		chartkey = msg.getChartkey();
+		rate = msg.getRate();
+	}
+	public Chart(StartChartMessage msg) {
+		title = msg.getTitle();
+		subtitle = msg.getSubtitle();
+		artist = msg.getArtist();
+		filehash = msg.getFilehash();
+		difficulty = msg.getDifficulty();
+		meter = msg.getMeter();
+		chartkey = msg.getChartkey();
+		rate = msg.getRate();
+	}
+	
 	public String getTitle() {
 		return title;
 	}
@@ -41,29 +67,29 @@ public class Chart {
 	public void setPickedBy(String pickedBy) {
 		this.pickedBy = pickedBy;
 	}
-	public double getMsd() {
-		return msd;
+	public String getDifficulty() {
+		return difficulty;
 	}
-	public void setMsd(double msd) {
-		this.msd = msd;
+	public void setDifficulty(String difficulty) {
+		this.difficulty = difficulty;
 	}
-	public double getMeter() {
+	public Double getMeter() {
 		return meter;
 	}
-	public void setMeter(double meter) {
+	public void setMeter(Double meter) {
 		this.meter = meter;
+	}
+	public Double getRate() {
+		return rate;
+	}
+	public void setRate(Double rate) {
+		this.rate = rate;
 	}
 	public String getChartkey() {
 		return chartkey;
 	}
 	public void setChartkey(String chartkey) {
 		this.chartkey = chartkey;
-	}
-	public double getRate() {
-		return rate;
-	}
-	public void setRate(double rate) {
-		this.rate = rate;
 	}
 
 }

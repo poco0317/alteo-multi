@@ -1,6 +1,5 @@
 package com.etterna.multi.socket.ettpmessage.handler;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -25,7 +24,7 @@ public class HelloMessageHandler extends EttpMessageHandler {
 	 * Sent on connect by a client
 	 */
 	public void hello(WebSocketSession session) {
-		respond(session, "hello", new HelloResponseMessage());
+		responder.respond(session, "hello", new HelloResponseMessage());
 	}
 	
 	public class HelloResponseMessage {

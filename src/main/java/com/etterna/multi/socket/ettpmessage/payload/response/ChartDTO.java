@@ -1,16 +1,20 @@
-package com.etterna.multi.socket.ettpmessage.payload;
+package com.etterna.multi.socket.ettpmessage.payload.response;
 
-public class StartChartMessage {
-
+public class ChartDTO {
+	private String chartkey;
 	private String title;
 	private String subtitle;
 	private String artist;
-	private String filehash;
-	private String chartkey;
-	private String pack;
-	private Double rate;
 	private String difficulty;
 	private Double meter;
+	private String filehash;
+	private Double rate;
+	public String getChartkey() {
+		return chartkey;
+	}
+	public void setChartkey(String chartkey) {
+		this.chartkey = chartkey;
+	}
 	public String getTitle() {
 		return title;
 	}
@@ -35,24 +39,6 @@ public class StartChartMessage {
 	public void setFilehash(String filehash) {
 		this.filehash = filehash;
 	}
-	public String getChartkey() {
-		return chartkey;
-	}
-	public void setChartkey(String chartkey) {
-		this.chartkey = chartkey;
-	}
-	public String getPack() {
-		return pack;
-	}
-	public void setPack(String pack) {
-		this.pack = pack;
-	}
-	public Double getRate() {
-		return rate;
-	}
-	public void setRate(Double rate) {
-		this.rate = rate;
-	}
 	public String getDifficulty() {
 		return difficulty;
 	}
@@ -65,5 +51,10 @@ public class StartChartMessage {
 	public void setMeter(Double meter) {
 		this.meter = meter;
 	}
-	
+	public Double getRate() {
+		return rate;
+	}
+	public void setRate(Double rate) {
+		this.rate = rate;
+	}
 }

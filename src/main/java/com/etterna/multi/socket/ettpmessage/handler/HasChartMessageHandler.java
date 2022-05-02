@@ -11,6 +11,7 @@ public class HasChartMessageHandler extends EttpMessageHandler {
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
+		
 	}
 
 }

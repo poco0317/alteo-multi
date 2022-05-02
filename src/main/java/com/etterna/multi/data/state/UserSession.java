@@ -1,6 +1,6 @@
 package com.etterna.multi.data.state;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.web.socket.WebSocketSession;
 
@@ -8,11 +8,12 @@ public class UserSession {
 	
 	private String username;
 	private WebSocketSession session;
-	private long lastPing;
+	private long lastPing = System.currentTimeMillis();
 	private int ettpcVersion;
 	private String client;
-	private List<String> packs;
-	private boolean isReady;
+	private Set<String> packs;
+	private PlayerState state = PlayerState.READY;
+	private boolean isReady = false;
 	private Lobby lobby;
 	
 	private double gameplayWife;
@@ -42,10 +43,10 @@ public class UserSession {
 	public void setClient(String client) {
 		this.client = client;
 	}
-	public List<String> getPacks() {
+	public Set<String> getPacks() {
 		return packs;
 	}
-	public void setPacks(List<String> packs) {
+	public void setPacks(Set<String> packs) {
 		this.packs = packs;
 	}
 	public boolean isReady() {
@@ -77,6 +78,12 @@ public class UserSession {
 	}
 	public void setLastPing(long lastPing) {
 		this.lastPing = lastPing;
+	}
+	public PlayerState getState() {
+		return state;
+	}
+	public void setState(PlayerState state) {
+		this.state = state;
 	}
 
 }

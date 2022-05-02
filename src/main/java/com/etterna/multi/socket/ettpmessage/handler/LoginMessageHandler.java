@@ -1,6 +1,5 @@
 package com.etterna.multi.socket.ettpmessage.handler;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -25,7 +24,7 @@ public class LoginMessageHandler extends EttpMessageHandler {
 			response.setLogged(false);
 			response.setMsg("Login failed for some reason.");
 		}
-		respond(session, "login", response);
+		responder.respond(session, "login", response);
 	}
 	
 	public class LoginResponseMessage {

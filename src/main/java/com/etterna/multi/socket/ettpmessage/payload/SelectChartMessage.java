@@ -7,9 +7,22 @@ public class SelectChartMessage {
 	private String filehash;
 	private String chartkey;
 	private String pack;
-	private double rate;
-	private double difficulty;
-	private double meter;
+	private Double rate;
+	private String difficulty;
+	private Double meter;
+	public SelectChartMessage() {}
+	public SelectChartMessage(StartChartMessage msg) {
+		title = msg.getTitle();
+		subtitle = msg.getSubtitle();
+		artist = msg.getArtist();
+		filehash = msg.getFilehash();
+		chartkey = msg.getChartkey();
+		pack = msg.getPack();
+		rate = msg.getRate();
+		difficulty = msg.getDifficulty();
+		meter = msg.getMeter();
+
+	}
 	public String getTitle() {
 		return title;
 	}
@@ -46,22 +59,22 @@ public class SelectChartMessage {
 	public void setPack(String pack) {
 		this.pack = pack;
 	}
-	public double getRate() {
+	public Double getRate() {
 		return rate;
 	}
-	public void setRate(double rate) {
+	public void setRate(Double rate) {
 		this.rate = rate;
 	}
-	public double getDifficulty() {
+	public String getDifficulty() {
 		return difficulty;
 	}
-	public void setDifficulty(double difficulty) {
+	public void setDifficulty(String difficulty) {
 		this.difficulty = difficulty;
 	}
-	public double getMeter() {
+	public Double getMeter() {
 		return meter;
 	}
-	public void setMeter(double meter) {
+	public void setMeter(Double meter) {
 		this.meter = meter;
 	}
 }

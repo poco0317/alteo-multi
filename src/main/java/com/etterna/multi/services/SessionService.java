@@ -1,6 +1,7 @@
 package com.etterna.multi.services;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,8 +13,25 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.etterna.multi.data.state.Chart;
+import com.etterna.multi.data.state.Lobby;
+import com.etterna.multi.data.state.LobbyState;
+import com.etterna.multi.data.state.PlayerState;
+import com.etterna.multi.data.state.SelectionMode;
 import com.etterna.multi.data.state.UserSession;
+import com.etterna.multi.socket.ettpmessage.payload.CreateRoomMessage;
+import com.etterna.multi.socket.ettpmessage.payload.EnterRoomMessage;
 import com.etterna.multi.socket.ettpmessage.payload.HelloMessage;
+import com.etterna.multi.socket.ettpmessage.payload.SelectChartMessage;
+import com.etterna.multi.socket.ettpmessage.payload.StartChartMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.ChartDTO;
+import com.etterna.multi.socket.ettpmessage.payload.response.DeleteRoomResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.EnterRoomResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.LeaderboardResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.PacklistResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.SelectChartResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.UpdateRoomResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.UserlistResponseMessage;
 
 @Service
 public class SessionService {
@@ -23,10 +41,20 @@ public class SessionService {
 	@Autowired
 	private UserLoginService loginService;
 	
+	@Autowired
+	private ResponseService responder;
+	
 	// session ids to usersessions
 	// usersessions dont necessarily have any user logged in
 	private ConcurrentHashMap<String, UserSession> sessions = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, Object> logins = new ConcurrentHashMap<>();
+	private static final Object NOTHING = new Object();
+	
+	// room names to lobbies
+	private ConcurrentHashMap<String, Lobby> rooms = new ConcurrentHashMap<>();
+	
+	// countdown threads
+	private ConcurrentHashMap<String, Thread> countdowns = new ConcurrentHashMap<>();
 
 	@Scheduled(fixedDelay = 1000L * 10L)
 	private void maintainSessions() {
@@ -63,6 +91,65 @@ public class SessionService {
 		m_logger.info("Session maintenance complete - {} sessions - {} logins", sessions.size(), logins.size());
 	}
 	
+	@Scheduled(fixedDelay = 1000L * 10L)
+	private void maintainLobbies() {
+		if (rooms.size() == 0) {
+			m_logger.debug("Skipping lobby maintenance - no lobbies");
+			return;
+		}
+		m_logger.info("Running lobby maintenance - {} lobbies", rooms.size());
+		
+		// remove empty lobbies
+		Iterator<Entry<String, Lobby>> it = rooms.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, Lobby> e = it.next();
+			Lobby l = e.getValue();
+			if (l.getPlayers().size() == 0) {
+				it.remove();
+			}
+		}
+		
+		// remove dead lobby references
+		for (UserSession user : sessions.values()) {
+			if (user.getLobby() != null && getLobby(user.getLobby().getName()) == null) {
+				user.setLobby(null);
+			}
+		}
+		
+		m_logger.info("Lobby maintenance complete - {} lobbies", rooms.size());
+	}
+	
+	/**
+	 * Get a user session from the connection
+	 */
+	public UserSession getUserSession(WebSocketSession session) {
+		return sessions.get(session.getId());
+	}
+	
+	/**
+	 * Get the lobby by name
+	 */
+	public Lobby getLobby(String name) {
+		return rooms.get(name.toLowerCase());
+	}
+	
+	/**
+	 * Get the lobby a user connection is in
+	 */
+	public Lobby getLobby(WebSocketSession session) {
+		return getLobby(getUserSession(session));
+	}
+	
+	/**
+	 * Get the lobby from a user session
+	 */
+	public Lobby getLobby(UserSession user) {
+		if (user != null) {
+			return user.getLobby();
+		}
+		return null;
+	}
+	
 	public void pingSession(String username) {
 		UserSession user = sessions.get(username);
 		if (user != null) {
@@ -80,6 +167,10 @@ public class SessionService {
 			}
 		}
 		if (sessions.containsKey(id)) {
+			UserSession user = sessions.get(id);
+			if (user.getUsername() != null) {
+				logins.remove(user.getUsername());
+			}
 			sessions.remove(id);
 			m_logger.info("Killed ws session - {}", id);
 		}		
@@ -110,8 +201,54 @@ public class SessionService {
 		sessions.put(session.getId(), user);
 	}
 	
+	/**
+	 * Send a message to the lobby tab of every connected user
+	 */
+	public void messageAllSessions(UserSession sender, String message) {
+		if (sender == null || sender.getUsername() == null) {
+			m_logger.warn("Attempted to send message to everyone using empty name - Message: {}", message);
+			return;
+		}
+		String senderName = ColorUtil.colorize(sender.getUsername(), ColorUtil.COLOR_PLAYER);
+		String messageToSend = senderName + ": " + message;
+		for (UserSession user : sessions.values()) {
+			responder.chatMessageToLobby(user.getSession(), messageToSend);
+		}
+	}
+	
+	/**
+	 * Send data to all users
+	 */
+	public <T> void respondAllSessions(String messageType, T ettpMessageResponse) {
+		for (UserSession user : sessions.values()) {
+			responder.respond(user.getSession(), messageType, ettpMessageResponse);
+		}
+	}
+	
+	/**
+	 * Privately send a message to a sender and a receiver
+	 */
+	public void privateMessage(UserSession sender, String recipientName, String message) {
+		if (sender == null || recipientName == null || message == null || sender.getUsername() == null) {
+			return;
+		}
+		if (logins.containsKey(recipientName)) {
+			UserSession recipient = null;
+			for (UserSession u : sessions.values()) {
+				if (u.getUsername() != null && u.getUsername().equals(recipientName)) {
+					recipient = u;
+					break;
+				}
+			}
+			String colorizedMsg = ColorUtil.colorize(sender.getUsername(), ColorUtil.COLOR_PLAYER) + ": " + message;
+			responder.chatMessageToRoom(sender.getSession(), colorizedMsg, recipientName);
+			responder.chatMessageToRoom(recipient.getSession(), colorizedMsg, sender.getUsername()); 
+		} else {
+			responder.chatMessageToUser(sender.getSession(), ColorUtil.system("Could not find user '"+recipientName+"'"));
+		}
+	}
+	
 	public boolean createLoginSession(String username, String password, WebSocketSession session) {
-		
 		boolean allowed = loginService.login(username, password);
 		
 		if (!allowed) {
@@ -130,11 +267,274 @@ public class SessionService {
 			// login
 			user.setLastPing(System.currentTimeMillis());
 			user.setUsername(username);
+			logins.put(username, NOTHING);
 		} else {
 			// user is not connected?
 			m_logger.error("Session could not be found for user {} - session {}", username, session.getId());
 		}
 		return true;
+	}
+	
+	/**
+	 * Shadow for CreateRoomMessage
+	 */
+	public boolean createLobby(WebSocketSession session, EnterRoomMessage msg) {
+		CreateRoomMessage amsg = new CreateRoomMessage();
+		amsg.setDesc(msg.getDesc());
+		amsg.setName(msg.getName());
+		amsg.setPass(msg.getPass());
+		return createLobby(session, amsg);
+	}
+	
+	public boolean createLobby(WebSocketSession session, CreateRoomMessage msg) {
+		String name = msg.getName();
+		Lobby lobby = getLobby(name);
+		if (lobby != null) {
+			return false;
+		}
+		
+		UserSession user = getUserSession(session);
+		if (user == null) {
+			return false;
+		}
+		
+		lobby = new Lobby();
+		lobby.setOwner(user);
+		lobby.getPlayers().add(user);
+		lobby.setSelectionmode(SelectionMode.CHARTKEY);
+		lobby.setName(msg.getName());
+		lobby.setDescription(msg.getDesc());
+		if (msg.getPass() != null && !msg.getPass().isBlank()) {
+			lobby.setPassword(msg.getPass());
+		}
+		lobby.calcCommonPacks();
+		
+		user.setLobby(lobby);
+		user.setState(PlayerState.READY);
+		user.setReady(false);
+		
+		rooms.put(name.toLowerCase(), lobby);
+		
+		return true;
+	}
+	
+	public void enterLobby(UserSession user, Lobby lobby) {
+		lobby.enter(user);
+		responder.respond(user.getSession(), "enterroom", new EnterRoomResponseMessage(true));
+		for (UserSession u : lobby.getPlayers()) {
+			responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername()+" joined."), lobby.getName());
+		}
+		user.setState(PlayerState.READY);
+		if (lobby.getChart() != null) {
+			responder.respond(user.getSession(), "selectchart", null);
+		}
+		respondAllSessions("updateroom", new UpdateRoomResponseMessage(lobby));
+		refreshUserList(lobby);
+		refreshPackList(lobby);
+	}
+	
+	public void removeFromLobby(UserSession user) {
+		Lobby lobby = getLobby(user);
+		if (lobby != null) {
+			// user no longer in this lobby
+			user.setLobby(null);
+			
+			// remove references to this user from the lobby
+			lobby.getPlayers().remove(user);
+			lobby.getOperators().remove(user);
+			if (lobby.getOwner().equals(user) && lobby.getPlayers().size() > 0) {
+				lobby.setOwner(lobby.getPlayers().iterator().next());
+			}
+			
+			// remove empty lobby
+			if (lobby.getPlayers().isEmpty()) {
+				rooms.remove(lobby.getName());
+				respondAllSessions("deleteroom", new DeleteRoomResponseMessage(lobby));
+			} else {
+				// otherwise make sure common packs is updated
+				lobby.calcCommonPacks();
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " left."), lobby.getName());
+				}
+			}
+			responder.chatMessageToLobby(user.getSession(), ColorUtil.system("Left room '"+lobby.getName()+"'"));
+		}
+	}
+	
+	public void updateLobbyState(Lobby lobby) {
+		if (lobby == null) {
+			return;
+		}
+		
+		LobbyState before = lobby.getState();
+		lobby.setState(LobbyState.SELECTING);
+		lobby.getPlayers().forEach(p -> {
+			if (!p.getState().equals(PlayerState.READY)) {
+				lobby.setState(LobbyState.INGAME);
+			}
+		});
+		refreshUserList(lobby);
+		if (lobby.getState().equals(LobbyState.SELECTING) && lobby.isPlaying()) {
+			lobby.setPlaying(false);
+			lobby.setChart(null);
+		}
+		
+		if (!lobby.getState().equals(before)) {
+			broadcastLobbyUpdate(lobby);
+		}
+	}
+	
+	public void broadcastLobbyUpdate(Lobby lobby) {
+		if (lobby != null) {
+			respondAllSessions("updateroom", new UpdateRoomResponseMessage(lobby));
+		}
+	}
+	
+	public void refreshUserList(Lobby lobby) {
+		if (lobby == null) {
+			return;
+		}
+		UserlistResponseMessage response = new UserlistResponseMessage(lobby);
+		for (UserSession user : lobby.getPlayers()) {
+			responder.respond(user.getSession(), "userlist", response);
+		}
+	}
+	
+	public void refreshPackList(Lobby lobby) {
+		if (lobby == null) {
+			return;
+		}
+		PacklistResponseMessage response = new PacklistResponseMessage(lobby);
+		for (UserSession user : lobby.getPlayers()) {
+			responder.respond(user.getSession(), "packlist", response);
+		}
+	}
+	
+	public void selectChart(UserSession user, StartChartMessage msg) {
+		selectChart(user, new SelectChartMessage(msg));
+	}
+	
+	public void selectChart(UserSession user, SelectChartMessage msg) {
+		Chart chart = new Chart(msg);
+		chart.setPickedBy(user.getUsername());
+
+		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
+		Double rate = response.getChart().getRate();
+		String ratestr = rate != null ? String.format("%.2f", rate / 1000) : "";
+		String chatmsg = String.format("%s selected %s (%s) %s %s",
+				user.getUsername(),
+				chart.getTitle(),
+				chart.getDifficulty(),
+				ratestr,
+				msg.getPack() != null ? msg.getPack() : "");
+		for (UserSession u : user.getLobby().getPlayers()) {
+			responder.respond(u.getSession(), "selectchart", response);
+			responder.chatMessageToRoom(u.getSession(), ColorUtil.system(chatmsg), user.getLobby().getName());
+		}
+	}
+	
+	public void startChart(UserSession user, StartChartMessage msg) {
+		Lobby lobby = user.getLobby();
+		if (lobby.isCountdown()) {
+			String errors = lobby.allReady(user);
+			if (errors != null && !errors.isBlank()) {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system(errors), lobby.getName());
+				}
+				return;
+			}
+			lobby.getPlayers().forEach(p -> p.setReady(false));
+			lobby.setForcestart(false);
+			startCountdown(user, msg);
+		} else {
+			startChartInternal(user, msg);
+		}
+	}
+	
+	private void startChartInternal(UserSession user, StartChartMessage msg) {
+		Lobby lobby = user.getLobby();
+		if (lobby == null) {
+			return;
+		}
+		Chart chart = new Chart(msg);
+		
+		ChartDTO newch = lobby.getChartDTO(chart);
+		ChartDTO oldch = lobby.getChartDTO(lobby.getChart());
+		if (lobby.getChart() == null || !newch.equals(oldch)) {
+			selectChart(user, msg);
+			return;
+		}
+		
+		String errors = lobby.allReady(user);
+		if (errors != null && !errors.isBlank()) {
+			for (UserSession u : lobby.getPlayers()) {
+				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(errors), lobby.getName());
+			}
+			return;
+		}
+		lobby.getPlayers().forEach(p -> p.setReady(false));
+		lobby.setForcestart(false);
+		lobby.setChart(chart);
+		lobby.setState(LobbyState.INGAME);
+		lobby.setPlaying(true);
+	}
+	
+	public void startCountdown(UserSession user, StartChartMessage msg) {
+		Lobby lobby = user.getLobby();
+		if (lobby == null || lobby.isInCountdown()) {
+			return;
+		}
+		lobby.setInCountdown(true);
+		Runnable work = new Runnable() {
+			public void run() {
+				final String nm = lobby.getName();
+				int left = lobby.getTimer();
+				while (left > 0) {
+					for (UserSession u : lobby.getPlayers()) {
+						if (u.getSession().isOpen()) {
+							responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Starting in "+left+" seconds."), lobby.getName());
+						}
+					}
+					left--;
+					try {
+						Thread.sleep(1000L);
+					} catch (Exception e) {}
+				}
+				for (UserSession u : lobby.getPlayers()) {
+					if (u.getSession().isOpen()) {
+						responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Starting song."), lobby.getName());
+					}
+				}
+				lobby.setInCountdown(false);
+				countdowns.remove(nm);
+				startChartInternal(user, msg);
+			}
+		};
+		Thread t = new Thread(work);
+		countdowns.put(lobby.getName(), t);
+		t.start();
+	}
+	
+	public void stopCountdown(Lobby lobby) {
+		if (lobby == null || !countdowns.containsKey(lobby.getName())) {
+			return;
+		}
+		
+		try {
+			countdowns.get(lobby.getName()).interrupt();
+		} catch (Exception e) {}
+		countdowns.remove(lobby.getName());
+	}
+	
+	public void updateLobbyGameplay(Lobby lobby) {
+		if (lobby == null) {
+			return;
+		}
+		
+		LeaderboardResponseMessage response = new LeaderboardResponseMessage(lobby);
+		for (UserSession user : lobby.getPlayers()) {
+			responder.respond(user.getSession(), "leaderboard", response);
+		}
 	}
 	
 	/**
@@ -149,7 +549,7 @@ public class SessionService {
 			} catch (Exception e) {
 				user.setEttpcVersion(0);
 			}
-			user.setPacks(msg.getPacks());
+			user.setPacks(new HashSet<>(msg.getPacks()));
 		} else {
 			m_logger.error("Session could not be found for session {}", session.getId());
 		}

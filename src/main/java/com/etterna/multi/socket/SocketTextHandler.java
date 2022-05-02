@@ -45,10 +45,16 @@ public class SocketTextHandler extends TextWebSocketHandler {
 		
 		try {
 			Class<? extends EttpMessageHandler> handlerClass = EttpMessageType.valueOf(ettpMessage.getType().toUpperCase()).getLinkedClass();
-			m_logger.debug("Handling incoming message type: {}", ettpMessage.getType());
-			ctx.getBean(handlerClass).handle(session, ettpMessage);
+			try {
+				m_logger.debug("Handling incoming message type: {}", ettpMessage.getType());
+				ctx.getBean(handlerClass).handle(session, ettpMessage);
+			} catch (Exception e) {
+				m_logger.error(e.getMessage(), e);
+				return;
+			}
 		} catch (Exception e) {
 			m_logger.warn("Unknown incoming message type: {}", ettpMessage.getType());
+			e.printStackTrace();
 			return;
 		}
 	}
