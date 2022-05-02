@@ -1,5 +1,7 @@
 package com.etterna.multi.socket.ettpmessage.payload.response;
 
+import java.util.Objects;
+
 public class ChartDTO {
 	private String chartkey;
 	private String title;
@@ -56,5 +58,23 @@ public class ChartDTO {
 	}
 	public void setRate(Double rate) {
 		this.rate = rate;
+	}
+	@Override
+	public int hashCode() {
+		return Objects.hash(artist, chartkey, difficulty, filehash, meter, rate, subtitle, title);
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ChartDTO other = (ChartDTO) obj;
+		return Objects.equals(artist, other.artist) && Objects.equals(chartkey, other.chartkey)
+				&& Objects.equals(difficulty, other.difficulty) && Objects.equals(filehash, other.filehash)
+				&& Objects.equals(meter, other.meter) && Objects.equals(rate, other.rate)
+				&& Objects.equals(subtitle, other.subtitle) && Objects.equals(title, other.title);
 	}
 }

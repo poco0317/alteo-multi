@@ -2,18 +2,14 @@ package com.etterna.multi.socket.ettpmessage.payload.response;
 
 import com.etterna.multi.data.state.Chart;
 
-public class SelectChartResponseMessage {
-	
+public class StartChartResponseMessage {
 	private ChartDTO chart;
 	
-	public SelectChartResponseMessage() {}
-	public SelectChartResponseMessage(ChartDTO c) {
+	public StartChartResponseMessage() {}
+	public StartChartResponseMessage(ChartDTO c) {
 		chart = c;
 	}
-	/**
-	 * Not used in preference of Lobby.serializeChart(Chart)
-	 */
-	public SelectChartResponseMessage(Chart chart) {
+	public StartChartResponseMessage(Chart chart) {
 		this.chart = new ChartDTO();
 		this.chart.setArtist(chart.getArtist());
 		this.chart.setChartkey(chart.getChartkey());
@@ -32,5 +28,4 @@ public class SelectChartResponseMessage {
 	public void setChart(ChartDTO chart) {
 		this.chart = chart;
 	}
-
 }

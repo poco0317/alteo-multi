@@ -1,5 +1,6 @@
 package com.etterna.multi.data.state;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.web.socket.WebSocketSession;
@@ -84,6 +85,27 @@ public class UserSession {
 	}
 	public void setState(PlayerState state) {
 		this.state = state;
+	}
+	@Override
+	public int hashCode() {
+		return Objects.hash(client, ettpcVersion, gameplayJudgments, gameplayWife, isReady, lastPing, lobby, packs,
+				session, state, username);
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserSession other = (UserSession) obj;
+		return Objects.equals(client, other.client) && ettpcVersion == other.ettpcVersion
+				&& Objects.equals(gameplayJudgments, other.gameplayJudgments)
+				&& Double.doubleToLongBits(gameplayWife) == Double.doubleToLongBits(other.gameplayWife)
+				&& isReady == other.isReady && lastPing == other.lastPing && Objects.equals(lobby, other.lobby)
+				&& Objects.equals(packs, other.packs) && Objects.equals(session, other.session) && state == other.state
+				&& Objects.equals(username, other.username);
 	}
 
 }

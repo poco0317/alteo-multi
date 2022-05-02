@@ -8,7 +8,7 @@ import com.etterna.multi.data.state.UserSession;
 
 public class LeaderboardResponseMessage {
 	
-	private List<GameplayDTO> scores = new ArrayList<>();;
+	private List<GameplayDTO> scores = new ArrayList<>();
 	
 	public LeaderboardResponseMessage() {}
 	public LeaderboardResponseMessage(Lobby lobby) {
@@ -21,6 +21,13 @@ public class LeaderboardResponseMessage {
 		}
 	}
 	
+	public List<GameplayDTO> getScores() {
+		return scores;
+	}
+	public void setScores(List<GameplayDTO> scores) {
+		this.scores = scores;
+	}
+
 	public class GameplayDTO {
 		private Double wife;
 		private String user;

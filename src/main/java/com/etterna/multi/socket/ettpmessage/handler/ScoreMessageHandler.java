@@ -19,7 +19,7 @@ public class ScoreMessageHandler extends EttpMessageHandler {
 		
 		ScoreResponseMessage score = new ScoreResponseMessage();
 		score.setName(user.getUsername());
-		score.setScore(score);
+		score.setScore(message.getPayload());
 		for (UserSession u : user.getLobby().getPlayers()) {
 			responder.respond(u.getSession(), "score", score);
 		}

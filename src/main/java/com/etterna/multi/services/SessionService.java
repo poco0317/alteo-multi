@@ -28,8 +28,10 @@ import com.etterna.multi.socket.ettpmessage.payload.response.ChartDTO;
 import com.etterna.multi.socket.ettpmessage.payload.response.DeleteRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.EnterRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.LeaderboardResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.LobbyUserlistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.PacklistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.SelectChartResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.StartChartResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.UpdateRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.UserlistResponseMessage;
 
@@ -62,7 +64,7 @@ public class SessionService {
 			m_logger.debug("Skipping session maintenance - no sessions");
 			return;
 		}
-		m_logger.info("Running session maintenance - {} sessions - {} logins", sessions.size(), logins.size());
+		m_logger.debug("Running session maintenance - {} sessions - {} logins", sessions.size(), logins.size());
 		
 		// prune forgotten dead sessions and logins
 		Iterator<Entry<String, UserSession>> it = sessions.entrySet().iterator();
@@ -88,7 +90,7 @@ public class SessionService {
 			}
 		}
 		
-		m_logger.info("Session maintenance complete - {} sessions - {} logins", sessions.size(), logins.size());
+		m_logger.debug("Session maintenance complete - {} sessions - {} logins", sessions.size(), logins.size());
 	}
 	
 	@Scheduled(fixedDelay = 1000L * 10L)
@@ -97,7 +99,7 @@ public class SessionService {
 			m_logger.debug("Skipping lobby maintenance - no lobbies");
 			return;
 		}
-		m_logger.info("Running lobby maintenance - {} lobbies", rooms.size());
+		m_logger.debug("Running lobby maintenance - {} lobbies", rooms.size());
 		
 		// remove empty lobbies
 		Iterator<Entry<String, Lobby>> it = rooms.entrySet().iterator();
@@ -116,7 +118,7 @@ public class SessionService {
 			}
 		}
 		
-		m_logger.info("Lobby maintenance complete - {} lobbies", rooms.size());
+		m_logger.debug("Lobby maintenance complete - {} lobbies", rooms.size());
 	}
 	
 	/**
@@ -329,7 +331,7 @@ public class SessionService {
 			responder.respond(user.getSession(), "selectchart", null);
 		}
 		respondAllSessions("updateroom", new UpdateRoomResponseMessage(lobby));
-		refreshUserList(lobby);
+		refreshLobbyUserList(lobby);
 		refreshPackList(lobby);
 	}
 	
@@ -373,7 +375,7 @@ public class SessionService {
 				lobby.setState(LobbyState.INGAME);
 			}
 		});
-		refreshUserList(lobby);
+		refreshLobbyUserList(lobby);
 		if (lobby.getState().equals(LobbyState.SELECTING) && lobby.isPlaying()) {
 			lobby.setPlaying(false);
 			lobby.setChart(null);
@@ -390,7 +392,12 @@ public class SessionService {
 		}
 	}
 	
-	public void refreshUserList(Lobby lobby) {
+	public void refreshConnectedUserList(UserSession recipient) {
+		LobbyUserlistResponseMessage response = new LobbyUserlistResponseMessage(sessions.values());
+		responder.respond(recipient.getSession(), "lobbyuserlist", response);
+	}
+	
+	public void refreshLobbyUserList(Lobby lobby) {
 		if (lobby == null) {
 			return;
 		}
@@ -417,6 +424,12 @@ public class SessionService {
 	public void selectChart(UserSession user, SelectChartMessage msg) {
 		Chart chart = new Chart(msg);
 		chart.setPickedBy(user.getUsername());
+		Lobby lobby = user.getLobby();
+		if (lobby != null) {
+			lobby.setChart(chart);
+		} else {
+			return;
+		}
 
 		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
 		Double rate = response.getChart().getRate();
@@ -477,6 +490,11 @@ public class SessionService {
 		lobby.setChart(chart);
 		lobby.setState(LobbyState.INGAME);
 		lobby.setPlaying(true);
+		StartChartResponseMessage response = new StartChartResponseMessage(newch);
+		for (UserSession u : lobby.getPlayers()) {
+			responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Starting "+chart.getTitle()), lobby.getName());
+			responder.respond(u.getSession(), "startchart", response);
+		}
 	}
 	
 	public void startCountdown(UserSession user, StartChartMessage msg) {
