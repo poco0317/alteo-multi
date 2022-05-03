@@ -3,8 +3,10 @@ package com.etterna.multi.services;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,8 @@ import com.etterna.multi.socket.ettpmessage.payload.response.LobbyUserlistRespon
 import com.etterna.multi.socket.ettpmessage.payload.response.LobbyUserlistUpdateResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.NewRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.PacklistResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.RoomDTO;
+import com.etterna.multi.socket.ettpmessage.payload.response.RoomlistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.SelectChartResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.StartChartResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.UpdateRoomResponseMessage;
@@ -278,6 +282,7 @@ public class SessionService {
 			logins.put(username, NOTHING);
 			refreshConnectedUserList(user);
 			broadcastConnectedUserLobbylistAddition(user);
+			sendAllRooms(user);
 		} else {
 			// user is not connected?
 			m_logger.error("Session could not be found for user {} - session {}", username, session.getId());
@@ -426,6 +431,16 @@ public class SessionService {
 	public void broadcastRoomCreation(Lobby lobby) {
 		NewRoomResponseMessage response = new NewRoomResponseMessage(lobby);
 		respondAllSessions("newroom", response);
+	}
+	
+	public void broadcastAllRooms() {
+		List<RoomDTO> roomdtos = rooms.values().stream().map(p -> new RoomDTO(p)).collect(Collectors.toList());
+		respondAllSessions("roomlist", new RoomlistResponseMessage(roomdtos));
+	}
+	
+	public void sendAllRooms(UserSession user) {
+		List<RoomDTO> roomdtos = rooms.values().stream().map(p -> new RoomDTO(p)).collect(Collectors.toList());
+		responder.respond(user.getSession(), "roomlist", new RoomlistResponseMessage(roomdtos));
 	}
 	
 	/**
