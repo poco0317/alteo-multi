@@ -29,6 +29,8 @@ import com.etterna.multi.socket.ettpmessage.payload.response.DeleteRoomResponseM
 import com.etterna.multi.socket.ettpmessage.payload.response.EnterRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.LeaderboardResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.LobbyUserlistResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.LobbyUserlistUpdateResponseMessage;
+import com.etterna.multi.socket.ettpmessage.payload.response.NewRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.PacklistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.SelectChartResponseMessage;
 import com.etterna.multi.socket.ettpmessage.payload.response.StartChartResponseMessage;
@@ -172,6 +174,8 @@ public class SessionService {
 			UserSession user = sessions.get(id);
 			if (user.getUsername() != null) {
 				logins.remove(user.getUsername());
+				broadcastConnectedUserLobbylistRemoval(user);
+				removeFromLobby(user);
 			}
 			sessions.remove(id);
 			m_logger.info("Killed ws session - {}", id);
@@ -191,6 +195,8 @@ public class SessionService {
 						m_logger.error(e1.getMessage(), e1);
 					}
 				}
+				broadcastConnectedUserLobbylistRemoval(u);
+				removeFromLobby(u);
 				it.remove();
 				m_logger.info("Killed ws session by user - {}", username);
 			}
@@ -270,6 +276,8 @@ public class SessionService {
 			user.setLastPing(System.currentTimeMillis());
 			user.setUsername(username);
 			logins.put(username, NOTHING);
+			refreshConnectedUserList(user);
+			broadcastConnectedUserLobbylistAddition(user);
 		} else {
 			// user is not connected?
 			m_logger.error("Session could not be found for user {} - session {}", username, session.getId());
@@ -315,7 +323,9 @@ public class SessionService {
 		user.setState(PlayerState.READY);
 		user.setReady(false);
 		
-		rooms.put(name.toLowerCase(), lobby);
+;		rooms.put(name.toLowerCase(), lobby);
+		broadcastRoomCreation(lobby);
+		refreshLobbyUserList(lobby);
 		
 		return true;
 	}
@@ -355,6 +365,7 @@ public class SessionService {
 			} else {
 				// otherwise make sure common packs is updated
 				lobby.calcCommonPacks();
+				refreshLobbyUserList(lobby);
 				for (UserSession u : lobby.getPlayers()) {
 					responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " left."), lobby.getName());
 				}
@@ -392,11 +403,34 @@ public class SessionService {
 		}
 	}
 	
+	/**
+	 * Send the entire connected logged in userlist to a specific user
+	 */
 	public void refreshConnectedUserList(UserSession recipient) {
 		LobbyUserlistResponseMessage response = new LobbyUserlistResponseMessage(sessions.values());
 		responder.respond(recipient.getSession(), "lobbyuserlist", response);
 	}
 	
+	public void broadcastConnectedUserLobbylistRemoval(UserSession leaver) {
+		LobbyUserlistUpdateResponseMessage response = new LobbyUserlistUpdateResponseMessage();
+		response.setOff(leaver.getUsername());
+		respondAllSessions("lobbyuserlistupdate", response);
+	}
+	
+	public void broadcastConnectedUserLobbylistAddition(UserSession joiner) {
+		LobbyUserlistUpdateResponseMessage response = new LobbyUserlistUpdateResponseMessage();
+		response.setOn(joiner.getUsername());
+		respondAllSessions("lobbyuserlistupdate", response);
+	}
+	
+	public void broadcastRoomCreation(Lobby lobby) {
+		NewRoomResponseMessage response = new NewRoomResponseMessage(lobby);
+		respondAllSessions("newroom", response);
+	}
+	
+	/**
+	 * For rooms/lobbies only
+	 */
 	public void refreshLobbyUserList(Lobby lobby) {
 		if (lobby == null) {
 			return;

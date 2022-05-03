@@ -18,6 +18,7 @@ public class UserlistResponseMessage {
 			p.setName(user.getUsername());
 			p.setStatus(user.getState().num() + 1);
 			p.setReady(user.isReady());
+			players.add(p);
 		}
 	}
 
