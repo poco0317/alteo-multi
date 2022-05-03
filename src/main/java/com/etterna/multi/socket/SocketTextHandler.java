@@ -35,12 +35,17 @@ public class SocketTextHandler extends TextWebSocketHandler {
 	
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message) {
-		m_logger.info("Got message: {}", message.getPayload());
 		
 		EttpMessage ettpMessage = Jackson.fromJsonString(message.getPayload(), EttpMessage.class);
 		if (ettpMessage == null) {
 			m_logger.warn("Failed to parse incoming message: {}", message.getPayload());
 			return;
+		}
+		
+		if (message.getPayload() != null && message.getPayload().contains("pass")) {
+			m_logger.info("Got message type: {}", ettpMessage.getType());
+		} else {
+			m_logger.info("Got message: {}", message.getPayload());
 		}
 		
 		try {

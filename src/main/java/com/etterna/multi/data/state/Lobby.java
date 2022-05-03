@@ -92,6 +92,10 @@ public class Lobby {
 		return owner.equals(user);
 	}
 	
+	public boolean isOperOrOwner(UserSession user) {
+		return isOwner(user) || isOperator(user);
+	}
+	
 	public void calcCommonPacks() {
 		Set<String> packs = new HashSet<>();
 		if (players.size() > 0) {

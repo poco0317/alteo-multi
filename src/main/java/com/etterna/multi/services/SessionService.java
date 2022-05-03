@@ -578,6 +578,85 @@ public class SessionService {
 		countdowns.remove(lobby.getName());
 	}
 	
+	public void toggleReady(UserSession user) {
+		if (user == null || user.getLobby() == null) {
+			return;
+		}
+		Lobby lobby = user.getLobby();
+		if (user.isReady()) {
+			user.setReady(false);
+			refreshLobbyUserList(lobby);
+			for (UserSession u : lobby.getPlayers()) {
+				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(u.getUsername() + " is not ready."), lobby.getName());
+			}
+		} else {
+			user.setReady(true);
+			refreshLobbyUserList(lobby);
+			for (UserSession u : lobby.getPlayers()) {
+				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(u.getUsername() + " is ready."), lobby.getName());
+			}
+		}
+	}
+	
+	public void toggleForce(UserSession user) {
+		if (user == null || user.getLobby() == null) {
+			return;
+		}
+		Lobby lobby = user.getLobby();
+		if (lobby.isOperOrOwner(user)) {
+			lobby.setForcestart(!lobby.isForcestart());
+			if (lobby.isForcestart()) {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Force start is enabled for this song."), lobby.getName());
+				}
+			} else {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Force start is disabled."), lobby.getName());
+				}
+			}
+		} else {
+			responder.chatMessageToRoom(user.getSession(), ColorUtil.system("You can't set force start."), lobby.getName());
+		}
+	}
+	
+	public void toggleFreepick(UserSession user) {
+		if (user == null || user.getLobby() == null) {
+			return;
+		}
+		Lobby lobby = user.getLobby();
+		if (lobby.isOperOrOwner(user)) {
+			lobby.setFreepick(!lobby.isFreepick());
+			if (lobby.isFreepick()) {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freepick is enabled. Anyone can pick a song."), lobby.getName());
+				}
+			} else {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freepick is disabled. Only Operators and the Owner can pick a song."), lobby.getName());
+				}
+			}
+		}
+	}
+	
+	public void toggleFreerate(UserSession user) {
+		if (user == null || user.getLobby() == null) {
+			return;
+		}
+		Lobby lobby = user.getLobby();
+		if (lobby.isOperOrOwner(user)) {
+			lobby.setFreerate(!lobby.isFreerate());
+			if (lobby.isFreerate()) {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freerate is enabled. You may pick any rate to play."), lobby.getName());
+				}
+			} else {
+				for (UserSession u : lobby.getPlayers()) {
+					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freerate is disabled. The song selector picks the rate."), lobby.getName());
+				}
+			}
+		}
+	}
+	
 	public void updateLobbyGameplay(Lobby lobby) {
 		if (lobby == null) {
 			return;
