@@ -19,7 +19,7 @@ public class MissingChartMessageHandler extends EttpMessageHandler {
 		}
 		
 		for (UserSession u : user.getLobby().getPlayers()) {
-			responder.chatMessageToRoom(u.getSession(), ColorUtil.system(u.getUsername() + " doesn't have the chart."), user.getLobby().getName());
+			responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " doesn't have the chart."), user.getLobby().getName());
 		}
 	}
 
