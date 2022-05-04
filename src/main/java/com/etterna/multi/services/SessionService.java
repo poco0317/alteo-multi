@@ -602,13 +602,13 @@ public class SessionService {
 			user.setReady(false);
 			refreshLobbyUserList(lobby);
 			for (UserSession u : lobby.getPlayers()) {
-				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(u.getUsername() + " is not ready."), lobby.getName());
+				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " is not ready."), lobby.getName());
 			}
 		} else {
 			user.setReady(true);
 			refreshLobbyUserList(lobby);
 			for (UserSession u : lobby.getPlayers()) {
-				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(u.getUsername() + " is ready."), lobby.getName());
+				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " is ready."), lobby.getName());
 			}
 		}
 	}
