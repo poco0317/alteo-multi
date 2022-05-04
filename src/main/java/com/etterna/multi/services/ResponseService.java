@@ -58,6 +58,15 @@ public class ResponseService {
 		}
 	}
 	
+	public void chatMessageToPrivateRoom(WebSocketSession session, String message, String room) {
+		if (session == null || !session.isOpen()) return;
+		try {
+			session.sendMessage(makeChatMessage(room, ChatMessageType.PRIVATE, message));
+		} catch (Exception e) {
+			m_logger.error(e.getMessage(), e);
+		}
+	}
+	
 	public void chatMessageToLobby(WebSocketSession session, String message) {
 		if (session == null || !session.isOpen()) return;
 		try {

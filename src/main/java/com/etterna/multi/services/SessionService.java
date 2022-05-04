@@ -253,8 +253,8 @@ public class SessionService {
 				}
 			}
 			String colorizedMsg = ColorUtil.colorize(sender.getUsername(), ColorUtil.COLOR_PLAYER) + ": " + message;
-			responder.chatMessageToRoom(sender.getSession(), colorizedMsg, recipientName);
-			responder.chatMessageToRoom(recipient.getSession(), colorizedMsg, sender.getUsername()); 
+			responder.chatMessageToPrivateRoom(sender.getSession(), colorizedMsg, recipientName);
+			responder.chatMessageToPrivateRoom(recipient.getSession(), colorizedMsg, sender.getUsername()); 
 		} else {
 			responder.chatMessageToUser(sender.getSession(), ColorUtil.system("Could not find user '"+recipientName+"'"));
 		}
