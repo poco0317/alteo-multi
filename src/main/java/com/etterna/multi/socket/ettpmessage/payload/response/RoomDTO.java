@@ -10,7 +10,7 @@ public class RoomDTO {
 	private String name;
 	private String desc;
 	private List<String> players;
-	private String pass;
+	private boolean pass;
 	private int state;
 	
 	public RoomDTO() {}
@@ -18,7 +18,7 @@ public class RoomDTO {
 		name = lobby.getName();
 		desc = lobby.getDescription();
 		state = lobby.getState().num();
-		pass = lobby.getPassword();
+		pass = lobby.getPassword() != null && !lobby.getPassword().isEmpty();
 		players = lobby.getPlayers().stream().map(p -> p.getUsername()).collect(Collectors.toList());
 	}
 	public String getName() {
@@ -45,10 +45,10 @@ public class RoomDTO {
 	public void setState(int state) {
 		this.state = state;
 	}
-	public String getPass() {
+	public boolean isPass() {
 		return pass;
 	}
-	public void setPass(String pass) {
+	public void setPass(boolean pass) {
 		this.pass = pass;
 	}
 
