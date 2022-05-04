@@ -13,7 +13,7 @@ public class Chart {
 	private String difficulty;
 	private Double meter;
 	private String chartkey;
-	private Double rate;
+	private Integer rate;
 	
 	public Chart() {}
 	public Chart(SelectChartMessage msg) {
@@ -79,10 +79,10 @@ public class Chart {
 	public void setMeter(Double meter) {
 		this.meter = meter;
 	}
-	public Double getRate() {
+	public Integer getRate() {
 		return rate;
 	}
-	public void setRate(Double rate) {
+	public void setRate(Integer rate) {
 		this.rate = rate;
 	}
 	public String getChartkey() {

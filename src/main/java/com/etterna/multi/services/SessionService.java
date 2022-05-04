@@ -328,7 +328,7 @@ public class SessionService {
 		user.setState(PlayerState.READY);
 		user.setReady(false);
 		
-;		rooms.put(name.toLowerCase(), lobby);
+		rooms.put(name.toLowerCase(), lobby);
 		broadcastRoomCreation(lobby);
 		refreshLobbyUserList(lobby);
 		
@@ -481,8 +481,8 @@ public class SessionService {
 		}
 
 		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
-		Double rate = response.getChart().getRate();
-		String ratestr = rate != null ? String.format("%.2f", rate / 1000) : "";
+		Integer rate = response.getChart().getRate();
+		String ratestr = rate != null ? String.format("%.2f", rate / 1000.0) : "";
 		String chatmsg = String.format("%s selected %s (%s) %s %s",
 				user.getUsername(),
 				chart.getTitle(),

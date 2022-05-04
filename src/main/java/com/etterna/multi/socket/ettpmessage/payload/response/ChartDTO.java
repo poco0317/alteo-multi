@@ -10,7 +10,7 @@ public class ChartDTO {
 	private String difficulty;
 	private Double meter;
 	private String filehash;
-	private Double rate;
+	private Integer rate;
 	public String getChartkey() {
 		return chartkey;
 	}
@@ -53,10 +53,10 @@ public class ChartDTO {
 	public void setMeter(Double meter) {
 		this.meter = meter;
 	}
-	public Double getRate() {
+	public Integer getRate() {
 		return rate;
 	}
-	public void setRate(Double rate) {
+	public void setRate(Integer rate) {
 		this.rate = rate;
 	}
 	@Override

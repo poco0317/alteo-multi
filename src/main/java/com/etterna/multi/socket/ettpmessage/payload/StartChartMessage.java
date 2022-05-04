@@ -8,7 +8,7 @@ public class StartChartMessage {
 	private String filehash;
 	private String chartkey;
 	private String pack;
-	private Double rate;
+	private Integer rate;
 	private String difficulty;
 	private Double meter;
 	public String getTitle() {
@@ -47,10 +47,10 @@ public class StartChartMessage {
 	public void setPack(String pack) {
 		this.pack = pack;
 	}
-	public Double getRate() {
+	public Integer getRate() {
 		return rate;
 	}
-	public void setRate(Double rate) {
+	public void setRate(Integer rate) {
 		this.rate = rate;
 	}
 	public String getDifficulty() {

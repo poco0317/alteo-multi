@@ -7,7 +7,7 @@ public class SelectChartMessage {
 	private String filehash;
 	private String chartkey;
 	private String pack;
-	private Double rate;
+	private Integer rate;
 	private String difficulty;
 	private Double meter;
 	public SelectChartMessage() {}
@@ -59,10 +59,10 @@ public class SelectChartMessage {
 	public void setPack(String pack) {
 		this.pack = pack;
 	}
-	public Double getRate() {
+	public Integer getRate() {
 		return rate;
 	}
-	public void setRate(Double rate) {
+	public void setRate(Integer rate) {
 		this.rate = rate;
 	}
 	public String getDifficulty() {
