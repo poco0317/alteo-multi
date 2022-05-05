@@ -2,7 +2,6 @@ package com.etterna.multi.services;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +74,7 @@ public class CommandService {
 	}
 	
 	
-	private void cmd_pm(CommandData data) {
+	void cmd_pm(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		List<String> args = data.getArgs();
 		if (args == null || args.size() == 0) {
@@ -87,27 +86,27 @@ public class CommandService {
 		sessions.privateMessage(user, recipient, message);
 	}
 	
-	private void cmd_wave(CommandData data) {
+	void cmd_wave(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		responder.chatMessageToRoom(user.getSession(), ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": ( * ^ *) ノシ", data.getMsgData().getTab());
 	}
 	
-	private void cmd_lenny(CommandData data) {
+	void cmd_lenny(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		responder.chatMessageToRoom(user.getSession(), ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": ( ͡° ͜ʖ ͡°)", data.getMsgData().getTab());
 	}
 	
-	private void cmd_shrug(CommandData data) {
+	void cmd_shrug(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		responder.chatMessageToRoom(user.getSession(), ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": ¯\\_(ツ)_/", data.getMsgData().getTab());
 	}
 	
-	private void cmd_help(CommandData data) {
+	void cmd_help(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		responder.chatMessageToUser(user.getSession(), ColorUtil.system("I didnt write help yet"));
 	}
 	
-	private void cmd_ready(CommandData data) {
+	void cmd_ready(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
 			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
@@ -116,7 +115,7 @@ public class CommandService {
 		sessions.toggleReady(user);
 	}
 	
-	private void cmd_force(CommandData data) {
+	void cmd_force(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
 			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
@@ -124,7 +123,7 @@ public class CommandService {
 		sessions.toggleForce(user);
 	}
 	
-	private void cmd_free(CommandData data) {
+	void cmd_free(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
 			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
@@ -132,7 +131,7 @@ public class CommandService {
 		sessions.toggleFreepick(user);
 	}
 	
-	private void cmd_freerate(CommandData data) {
+	void cmd_freerate(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
 			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
