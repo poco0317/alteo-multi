@@ -34,7 +34,7 @@ public class CommandService {
 	private SessionService sessions;
 	
 	@Autowired
-	private ResponseService responder;
+	private EttpResponseMessageService responder;
 	
 	@PostConstruct
 	private void init() {

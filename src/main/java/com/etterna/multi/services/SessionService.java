@@ -50,7 +50,7 @@ public class SessionService {
 	private UserLoginService loginService;
 	
 	@Autowired
-	private ResponseService responder;
+	private EttpResponseMessageService responder;
 	
 	// session ids to usersessions
 	// usersessions dont necessarily have any user logged in

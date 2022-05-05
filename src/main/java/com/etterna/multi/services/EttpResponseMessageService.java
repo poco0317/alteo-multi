@@ -12,9 +12,9 @@ import com.etterna.multi.socket.ettpmessage.EttpMessageResponse;
 import com.etterna.multi.socket.ettpmessage.payload.ChatMessage;
 
 @Service
-public class ResponseService {
+public class EttpResponseMessageService {
 	
-	private static final Logger m_logger = LoggerFactory.getLogger(ResponseService.class);
+	private static final Logger m_logger = LoggerFactory.getLogger(EttpResponseMessageService.class);
 	
 	
 	public <T> void respond(WebSocketSession session, String messageType, T ettpMessageResponse) {
