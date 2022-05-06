@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.UserSession;
+import com.etterna.multi.socket.ettpmessage.ChatMessageType;
 import com.etterna.multi.socket.ettpmessage.payload.ChatMessage;
 
 /**
@@ -73,6 +74,25 @@ public class CommandService {
 		}
 	}
 	
+	/**
+	 * Send a chat message to either public lobby, private message, or player's room based on attributes
+	 */
+	private void chat(UserSession user, String tab, int msgType, String message) {
+		if (tab == null || tab.isBlank() || msgType == ChatMessageType.LOBBY.num()) {
+			// this might be going to the public lobby
+			sessions.chatToMainLobby(user, message);
+		} else {
+			// a tab was specified
+			if (msgType == ChatMessageType.ROOM.num()) {
+				// this is a dm
+				sessions.privateMessage(user, tab, message);
+			} else {
+				// this is a room message
+				responder.userChatToLobby(user, message);
+			}
+		}
+	}
+	
 	
 	void cmd_pm(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
@@ -88,28 +108,37 @@ public class CommandService {
 	
 	void cmd_wave(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
-		responder.chatMessageToRoom(user.getSession(), ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": ( * ^ *) ノシ", data.getMsgData().getTab());
+		final String tab = data.getMsgData().getTab();
+		final int msgType = data.getMsgData().getMsgtype();
+		final String wave = "( * ^ *) ノシ";
+		chat(user, tab, msgType, wave);
 	}
 	
 	void cmd_lenny(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
-		responder.chatMessageToRoom(user.getSession(), ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": ( ͡° ͜ʖ ͡°)", data.getMsgData().getTab());
+		final String tab = data.getMsgData().getTab();
+		final int msgType = data.getMsgData().getMsgtype();
+		final String lenny = "( ͡° ͜ʖ ͡°)";
+		chat(user, tab, msgType, lenny);
 	}
 	
 	void cmd_shrug(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
-		responder.chatMessageToRoom(user.getSession(), ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": ¯\\_(ツ)_/", data.getMsgData().getTab());
+		final String tab = data.getMsgData().getTab();
+		final int msgType = data.getMsgData().getMsgtype();
+		final String shrug = "¯\\_(ツ)_/";
+		chat(user, tab, msgType, shrug);
 	}
 	
 	void cmd_help(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
-		responder.chatMessageToUser(user.getSession(), ColorUtil.system("I didnt write help yet"));
+		responder.systemNoticeToUser(user, "I didn't write help yet", "");
 	}
 	
 	void cmd_ready(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
-			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
+			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 			return;
 		}
 		sessions.toggleReady(user);
@@ -118,7 +147,7 @@ public class CommandService {
 	void cmd_force(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
-			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
+			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 		}
 		sessions.toggleForce(user);
 	}
@@ -126,7 +155,7 @@ public class CommandService {
 	void cmd_free(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
-			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
+			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 		}
 		sessions.toggleFreepick(user);
 	}
@@ -134,7 +163,7 @@ public class CommandService {
 	void cmd_freerate(CommandData data) {
 		UserSession user = sessions.getUserSession(data.getSession());
 		if (user.getLobby() == null) {
-			responder.chatMessageToUser(user.getSession(), "You aren't in a lobby");
+			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 		}
 		sessions.toggleFreerate(user);
 	}

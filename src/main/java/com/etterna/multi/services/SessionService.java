@@ -216,15 +216,13 @@ public class SessionService {
 	/**
 	 * Send a message to the lobby tab of every connected user
 	 */
-	public void messageAllSessions(UserSession sender, String message) {
+	public void chatToMainLobby(UserSession sender, String message) {
 		if (sender == null || sender.getUsername() == null) {
 			m_logger.warn("Attempted to send message to everyone using empty name - Message: {}", message);
 			return;
 		}
-		String senderName = ColorUtil.colorize(sender.getUsername(), ColorUtil.COLOR_PLAYER);
-		String messageToSend = senderName + ": " + message;
 		for (UserSession user : sessions.values()) {
-			responder.chatMessageToLobby(user.getSession(), messageToSend);
+			responder.userChatToMainLobby(user, sender.getUsername(), message);
 		}
 	}
 	
@@ -252,11 +250,9 @@ public class SessionService {
 					break;
 				}
 			}
-			String colorizedMsg = ColorUtil.colorize(sender.getUsername(), ColorUtil.COLOR_PLAYER) + ": " + message;
-			responder.chatMessageToPrivateRoom(sender.getSession(), colorizedMsg, recipientName);
-			responder.chatMessageToPrivateRoom(recipient.getSession(), colorizedMsg, sender.getUsername()); 
+			responder.userChatPrivatelyToUser(sender, recipient, message); 
 		} else {
-			responder.chatMessageToUser(sender.getSession(), ColorUtil.system("Could not find user '"+recipientName+"'"));
+			responder.systemNoticeToUser(sender, "Could not find user '"+recipientName+"'", "");
 		}
 	}
 	
@@ -338,9 +334,7 @@ public class SessionService {
 	public void enterLobby(UserSession user, Lobby lobby) {
 		lobby.enter(user);
 		responder.respond(user.getSession(), "enterroom", new EnterRoomResponseMessage(true));
-		for (UserSession u : lobby.getPlayers()) {
-			responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername()+" joined."), lobby.getName());
-		}
+		responder.systemNoticeToEntireLobby(lobby, user.getUsername()+" joined.");
 		user.setState(PlayerState.READY);
 		if (lobby.getChart() != null) {
 			responder.respond(user.getSession(), "selectchart", null);
@@ -371,18 +365,14 @@ public class SessionService {
 				// otherwise make sure common packs is updated
 				lobby.calcCommonPacks();
 				refreshLobbyUserList(lobby);
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " left."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, user.getUsername() + " left.");
 			}
-			responder.chatMessageToLobby(user.getSession(), ColorUtil.system("Left room '"+lobby.getName()+"'"));
+			responder.systemNoticeToUserInMainLobby(user, "Left room '"+lobby.getName()+"'");
 		}
 	}
 	
 	public void updateLobbyState(Lobby lobby) {
-		if (lobby == null) {
-			return;
-		}
+		if (lobby == null) return;
 		
 		LobbyState before = lobby.getState();
 		lobby.setState(LobbyState.SELECTING);
@@ -447,23 +437,15 @@ public class SessionService {
 	 * For rooms/lobbies only
 	 */
 	public void refreshLobbyUserList(Lobby lobby) {
-		if (lobby == null) {
-			return;
-		}
+		if (lobby == null) return;
 		UserlistResponseMessage response = new UserlistResponseMessage(lobby);
-		for (UserSession user : lobby.getPlayers()) {
-			responder.respond(user.getSession(), "userlist", response);
-		}
+		responder.respondToLobby(lobby, "userlist", response);
 	}
 	
 	public void refreshPackList(Lobby lobby) {
-		if (lobby == null) {
-			return;
-		}
+		if (lobby == null) return;
 		PacklistResponseMessage response = new PacklistResponseMessage(lobby);
-		for (UserSession user : lobby.getPlayers()) {
-			responder.respond(user.getSession(), "packlist", response);
-		}
+		responder.respondToLobby(lobby, "packlist", response);
 	}
 	
 	public void selectChart(UserSession user, StartChartMessage msg) {
@@ -474,11 +456,8 @@ public class SessionService {
 		Chart chart = new Chart(msg);
 		chart.setPickedBy(user.getUsername());
 		Lobby lobby = user.getLobby();
-		if (lobby != null) {
-			lobby.setChart(chart);
-		} else {
-			return;
-		}
+		if (lobby == null) return;
+		lobby.setChart(chart);
 
 		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
 		Integer rate = response.getChart().getRate();
@@ -489,10 +468,8 @@ public class SessionService {
 				chart.getDifficulty(),
 				ratestr,
 				msg.getPack() != null ? msg.getPack() : "");
-		for (UserSession u : user.getLobby().getPlayers()) {
-			responder.respond(u.getSession(), "selectchart", response);
-			responder.chatMessageToRoom(u.getSession(), ColorUtil.system(chatmsg), user.getLobby().getName());
-		}
+		responder.respondToLobby(lobby, "selectchart", response);
+		responder.systemNoticeToEntireLobby(lobby, chatmsg);
 	}
 	
 	public void startChart(UserSession user, StartChartMessage msg) {
@@ -500,9 +477,7 @@ public class SessionService {
 		if (lobby.isCountdown()) {
 			String errors = lobby.allReady(user);
 			if (errors != null && !errors.isBlank()) {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system(errors), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, errors);
 				return;
 			}
 			lobby.getPlayers().forEach(p -> p.setReady(false));
@@ -515,9 +490,7 @@ public class SessionService {
 	
 	private void startChartInternal(UserSession user, StartChartMessage msg) {
 		Lobby lobby = user.getLobby();
-		if (lobby == null) {
-			return;
-		}
+		if (lobby == null) return;
 		Chart chart = new Chart(msg);
 		
 		ChartDTO newch = lobby.getChartDTO(chart);
@@ -529,9 +502,7 @@ public class SessionService {
 		
 		String errors = lobby.allReady(user);
 		if (errors != null && !errors.isBlank()) {
-			for (UserSession u : lobby.getPlayers()) {
-				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(errors), lobby.getName());
-			}
+			responder.systemNoticeToEntireLobby(lobby, errors);
 			return;
 		}
 		lobby.getPlayers().forEach(p -> p.setReady(false));
@@ -540,38 +511,26 @@ public class SessionService {
 		lobby.setState(LobbyState.INGAME);
 		lobby.setPlaying(true);
 		StartChartResponseMessage response = new StartChartResponseMessage(newch);
-		for (UserSession u : lobby.getPlayers()) {
-			responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Starting "+chart.getTitle()), lobby.getName());
-			responder.respond(u.getSession(), "startchart", response);
-		}
+		responder.respondToLobby(lobby, "startchart", response);
+		responder.systemNoticeToEntireLobby(lobby, "Starting "+chart.getTitle());
 	}
 	
 	public void startCountdown(UserSession user, StartChartMessage msg) {
 		Lobby lobby = user.getLobby();
-		if (lobby == null || lobby.isInCountdown()) {
-			return;
-		}
+		if (lobby == null || lobby.isInCountdown()) return;
 		lobby.setInCountdown(true);
 		Runnable work = new Runnable() {
 			public void run() {
 				final String nm = lobby.getName();
 				int left = lobby.getTimer();
 				while (left > 0) {
-					for (UserSession u : lobby.getPlayers()) {
-						if (u.getSession().isOpen()) {
-							responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Starting in "+left+" seconds."), lobby.getName());
-						}
-					}
+					responder.systemNoticeToEntireLobby(lobby, "Starting in "+left+" seconds.");
 					left--;
 					try {
 						Thread.sleep(1000L);
 					} catch (Exception e) {}
 				}
-				for (UserSession u : lobby.getPlayers()) {
-					if (u.getSession().isOpen()) {
-						responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Starting song."), lobby.getName());
-					}
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Starting song.");
 				lobby.setInCountdown(false);
 				countdowns.remove(nm);
 				startChartInternal(user, msg);
@@ -583,9 +542,7 @@ public class SessionService {
 	}
 	
 	public void stopCountdown(Lobby lobby) {
-		if (lobby == null || !countdowns.containsKey(lobby.getName())) {
-			return;
-		}
+		if (lobby == null || !countdowns.containsKey(lobby.getName())) return;
 		
 		try {
 			countdowns.get(lobby.getName()).interrupt();
@@ -594,93 +551,69 @@ public class SessionService {
 	}
 	
 	public void toggleReady(UserSession user) {
-		if (user == null || user.getLobby() == null) {
-			return;
-		}
+		if (user == null || user.getLobby() == null) return;
 		Lobby lobby = user.getLobby();
 		if (user.isReady()) {
 			user.setReady(false);
 			refreshLobbyUserList(lobby);
-			for (UserSession u : lobby.getPlayers()) {
-				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " is not ready."), lobby.getName());
-			}
+			responder.systemNoticeToEntireLobby(lobby, user.getUsername() + " is not ready.");
 		} else {
 			user.setReady(true);
 			refreshLobbyUserList(lobby);
-			for (UserSession u : lobby.getPlayers()) {
-				responder.chatMessageToRoom(u.getSession(), ColorUtil.system(user.getUsername() + " is ready."), lobby.getName());
-			}
+			responder.systemNoticeToEntireLobby(lobby, user.getUsername() + " is ready.");
 		}
 	}
 	
 	public void toggleForce(UserSession user) {
-		if (user == null || user.getLobby() == null) {
-			return;
-		}
+		if (user == null || user.getLobby() == null) return;
 		Lobby lobby = user.getLobby();
 		if (lobby.isOperOrOwner(user)) {
 			lobby.setForcestart(!lobby.isForcestart());
 			if (lobby.isForcestart()) {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Force start is enabled for this song."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Force start is enabled for this song.");
 			} else {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Force start is disabled."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Force start is disabled.");
 			}
 		} else {
-			responder.chatMessageToRoom(user.getSession(), ColorUtil.system("You can't set force start."), lobby.getName());
+			responder.systemNoticeToUser(user, "You can't set force start.", user.getLobby().getName());
 		}
 	}
 	
 	public void toggleFreepick(UserSession user) {
-		if (user == null || user.getLobby() == null) {
-			return;
-		}
+		if (user == null || user.getLobby() == null) return;
 		Lobby lobby = user.getLobby();
 		if (lobby.isOperOrOwner(user)) {
 			lobby.setFreepick(!lobby.isFreepick());
 			if (lobby.isFreepick()) {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freepick is enabled. Anyone can pick a song."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Freepick is enabled. Anyone can pick a song.");
 			} else {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freepick is disabled. Only Operators and the Owner can pick a song."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Freepick is disabled. Only Operators and the Owner can pick a song.");
 			}
+		} else {
+			responder.systemNoticeToUser(user, "You can't set free song selection.", user.getLobby().getName());
 		}
 	}
 	
 	public void toggleFreerate(UserSession user) {
-		if (user == null || user.getLobby() == null) {
-			return;
-		}
+		if (user == null || user.getLobby() == null) return;
 		Lobby lobby = user.getLobby();
 		if (lobby.isOperOrOwner(user)) {
 			lobby.setFreerate(!lobby.isFreerate());
 			if (lobby.isFreerate()) {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freerate is enabled. You may pick any rate to play."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Freerate is enabled. You may pick any rate to play.");
 			} else {
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), ColorUtil.system("Freerate is disabled. The song selector picks the rate."), lobby.getName());
-				}
+				responder.systemNoticeToEntireLobby(lobby, "Freerate is disabled. The song selector picks the rate.");
 			}
+		} else {
+			responder.systemNoticeToUser(user, "You can't set free rate selection.", user.getLobby().getName());
 		}
 	}
 	
 	public void updateLobbyGameplay(Lobby lobby) {
-		if (lobby == null) {
-			return;
-		}
+		if (lobby == null) return;
 		
 		LeaderboardResponseMessage response = new LeaderboardResponseMessage(lobby);
-		for (UserSession user : lobby.getPlayers()) {
-			responder.respond(user.getSession(), "leaderboard", response);
-		}
+		responder.respondToLobby(lobby, "leaderboard", response);
 	}
 	
 	/**

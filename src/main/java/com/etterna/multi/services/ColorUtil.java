@@ -18,14 +18,23 @@ public class ColorUtil {
 		return "|c0"+s;
 	}
 	
+	/**
+	 * Apply color formatting to a substring
+	 */
 	public static String colorize(String s, String color) {
 		return color(color) + s + color(COLOR_WHITE);
 	}
 	
+	/**
+	 * Generate a system message using the system color
+	 */
 	public static String system(String s) {
 		return colorize("System:", COLOR_SYSTEM) + " " + s;
 	}
 	
+	/**
+	 * Determine the color for a user based on their lobby
+	 */
 	public static String colorUser(UserSession user) {
 		if (user.getLobby() != null) {
 			if (user.getLobby().isOwner(user)) {
@@ -41,5 +50,11 @@ public class ColorUtil {
 		return COLOR_PLAYER;
 	}
 	
+	/**
+	 * Return a full message line for a given user and message, colorizing the username
+	 */
+	public static String colorUserMessage(UserSession user, String message) {
+		return colorize(user.getUsername(), colorUser(user)) + ": " + message;
+	}
 
 }

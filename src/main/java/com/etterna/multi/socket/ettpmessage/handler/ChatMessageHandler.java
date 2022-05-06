@@ -5,7 +5,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
-import com.etterna.multi.services.ColorUtil;
 import com.etterna.multi.socket.ettpmessage.ChatMessageType;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
@@ -53,19 +52,16 @@ public class ChatMessageHandler extends EttpMessageHandler {
 		ChatMessageType msgType = ChatMessageType.values()[msg.getMsgtype()];
 		switch (msgType) {
 			case LOBBY: {
-				sessions.messageAllSessions(user, msg.getMsg());
+				sessions.chatToMainLobby(user, msg.getMsg());
 				break;
 			}
 			case ROOM: {
 				Lobby lobby = user.getLobby();
 				if (lobby == null || !lobby.getName().equals(msg.getTab())) {
-					responder.chatMessageToRoom(session, ColorUtil.system("You're not in the room '"+msg.getTab()+"'"), msg.getTab());
+					responder.systemNoticeToUser(user, "You're not in the room '"+msg.getTab()+"'", msg.getTab());
 					return;
 				}
-				String coloredMsg = ColorUtil.colorize(user.getUsername(), ColorUtil.colorUser(user)) + ": " + msg.getMsg();
-				for (UserSession u : lobby.getPlayers()) {
-					responder.chatMessageToRoom(u.getSession(), coloredMsg, msg.getTab());
-				}
+				responder.userChatToLobby(user, msg.getMsg());
 				break;
 			}
 			case PRIVATE: {

@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.UserSession;
-import com.etterna.multi.services.ColorUtil;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.payload.CreateRoomMessage;
@@ -22,17 +21,17 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 		}
 		
 		if (msg.getName() == null) {
-			responder.chatMessageToLobby(session, ColorUtil.system("Cannot use empty room name."));
+			responder.systemNoticeToUserInMainLobby(user, "Cannot use empty room name.");
 			return;
 		}
 		
 		sessions.removeFromLobby(user);
 		if (sessions.createLobby(session, msg)) {
 			responder.respond(session, "createroom", new CreateRoomResponseMessage(true));
-			responder.chatMessageToRoom(session, ColorUtil.system("Created room '"+msg.getName()+"'"), msg.getName());
+			responder.systemNoticeToUser(user, "Created room '"+msg.getName()+"'", msg.getName());
 		} else {
 			responder.respond(session, "createroom", new CreateRoomResponseMessage(false));
-			responder.chatMessageToLobby(session, ColorUtil.system("Room name already in use."));
+			responder.systemNoticeToUserInMainLobby(user, "Room name already in use.");
 		}
 	}
 	

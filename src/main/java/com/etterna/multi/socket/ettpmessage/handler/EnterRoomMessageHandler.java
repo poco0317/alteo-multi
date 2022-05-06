@@ -35,7 +35,7 @@ public class EnterRoomMessageHandler extends EttpMessageHandler {
 				} else {
 					// failed password
 					responder.respond(session, "enterroom", new EnterRoomResponseMessage(false));
-					responder.chatMessageToLobby(session, ColorUtil.system("Incorrect password."));
+					responder.systemNoticeToUserInMainLobby(user, ColorUtil.system("Incorrect password."));
 				}
 			}
 		} else {
