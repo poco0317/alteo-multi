@@ -16,7 +16,7 @@ import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.EttpMessageType;
-import com.etterna.multi.socket.ettpmessage.handler.HelloMessageHandler;
+import com.etterna.multi.socket.ettpmessage.client.handler.HelloMessageHandler;
 
 @Component
 @Scope("prototype")

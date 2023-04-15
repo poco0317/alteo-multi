@@ -1,42 +1,28 @@
-package com.etterna.multi.data.state;
+package com.etterna.multi.socket.ettpmessage.client.payload;
 
-import com.etterna.multi.socket.ettpmessage.client.payload.SelectChartMessage;
-import com.etterna.multi.socket.ettpmessage.client.payload.StartChartMessage;
-
-public class Chart {
-	
+public class SelectChartMessage {
 	private String title;
 	private String subtitle;
 	private String artist;
 	private String filehash;
-	private String pickedBy;
+	private String chartkey;
+	private String pack;
+	private Integer rate;
 	private String difficulty;
 	private Double meter;
-	private String chartkey;
-	private Integer rate;
-	
-	public Chart() {}
-	public Chart(SelectChartMessage msg) {
+	public SelectChartMessage() {}
+	public SelectChartMessage(StartChartMessage msg) {
 		title = msg.getTitle();
 		subtitle = msg.getSubtitle();
 		artist = msg.getArtist();
 		filehash = msg.getFilehash();
+		chartkey = msg.getChartkey();
+		pack = msg.getPack();
+		rate = msg.getRate();
 		difficulty = msg.getDifficulty();
 		meter = msg.getMeter();
-		chartkey = msg.getChartkey();
-		rate = msg.getRate();
+
 	}
-	public Chart(StartChartMessage msg) {
-		title = msg.getTitle();
-		subtitle = msg.getSubtitle();
-		artist = msg.getArtist();
-		filehash = msg.getFilehash();
-		difficulty = msg.getDifficulty();
-		meter = msg.getMeter();
-		chartkey = msg.getChartkey();
-		rate = msg.getRate();
-	}
-	
 	public String getTitle() {
 		return title;
 	}
@@ -61,11 +47,23 @@ public class Chart {
 	public void setFilehash(String filehash) {
 		this.filehash = filehash;
 	}
-	public String getPickedBy() {
-		return pickedBy;
+	public String getChartkey() {
+		return chartkey;
 	}
-	public void setPickedBy(String pickedBy) {
-		this.pickedBy = pickedBy;
+	public void setChartkey(String chartkey) {
+		this.chartkey = chartkey;
+	}
+	public String getPack() {
+		return pack;
+	}
+	public void setPack(String pack) {
+		this.pack = pack;
+	}
+	public Integer getRate() {
+		return rate;
+	}
+	public void setRate(Integer rate) {
+		this.rate = rate;
 	}
 	public String getDifficulty() {
 		return difficulty;
@@ -79,17 +77,4 @@ public class Chart {
 	public void setMeter(Double meter) {
 		this.meter = meter;
 	}
-	public Integer getRate() {
-		return rate;
-	}
-	public void setRate(Integer rate) {
-		this.rate = rate;
-	}
-	public String getChartkey() {
-		return chartkey;
-	}
-	public void setChartkey(String chartkey) {
-		this.chartkey = chartkey;
-	}
-
 }

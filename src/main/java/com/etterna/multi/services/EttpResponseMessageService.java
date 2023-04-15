@@ -13,7 +13,7 @@ import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
 import com.etterna.multi.socket.ettpmessage.ChatMessageType;
 import com.etterna.multi.socket.ettpmessage.EttpMessageResponse;
-import com.etterna.multi.socket.ettpmessage.payload.ChatMessage;
+import com.etterna.multi.socket.ettpmessage.client.payload.ChatMessage;
 
 @Service
 public class EttpResponseMessageService {

@@ -17,7 +17,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.UserSession;
 import com.etterna.multi.socket.ettpmessage.ChatMessageType;
-import com.etterna.multi.socket.ettpmessage.payload.ChatMessage;
+import com.etterna.multi.socket.ettpmessage.client.payload.ChatMessage;
 
 /**
  * Contains public access to commands

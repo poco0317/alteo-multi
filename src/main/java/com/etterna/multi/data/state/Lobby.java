@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.etterna.multi.services.PasswordUtil;
-import com.etterna.multi.socket.ettpmessage.payload.response.ChartDTO;
-import com.etterna.multi.socket.ettpmessage.payload.response.SelectChartResponseMessage;
+import com.etterna.multi.socket.ettpmessage.server.payload.ChartDTO;
+import com.etterna.multi.socket.ettpmessage.server.payload.SelectChartResponseMessage;
 
 public class Lobby {
 

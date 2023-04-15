@@ -1,6 +1,6 @@
 package com.etterna.multi.socket.ettpmessage;
 
-import com.etterna.multi.socket.ettpmessage.handler.*;
+import com.etterna.multi.socket.ettpmessage.client.handler.*;
 
 /**
  * Messages sent by the client to the server.

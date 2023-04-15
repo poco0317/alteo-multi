@@ -1,6 +1,6 @@
 package com.etterna.multi.data.state;
 
-import com.etterna.multi.socket.ettpmessage.payload.response.ChartDTO;
+import com.etterna.multi.socket.ettpmessage.server.payload.ChartDTO;
 
 public enum SelectionMode {
 	
