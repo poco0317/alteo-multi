@@ -12,9 +12,9 @@ public class LeaveRoomMessageHandler extends EttpMessageHandler {
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
-		UserSession user = sessions.getUserSession(session);
+		UserSession user = sessions.get(session);
 		if (user != null && user.getUsername() != null) {
-			sessions.removeFromLobby(user);
+			multiplayer.removeFromLobby(user);
 		}
 	}
 

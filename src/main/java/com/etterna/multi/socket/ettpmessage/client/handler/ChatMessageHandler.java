@@ -17,7 +17,7 @@ public class ChatMessageHandler extends EttpMessageHandler {
 	public void handle(WebSocketSession session, EttpMessage message) {
 		ChatMessage msg = readPayload(message, ChatMessage.class);
 		
-		UserSession user = sessions.getUserSession(session);
+		UserSession user = sessions.get(session);
 		if (user == null || user.getUsername() == null) {
 			return;
 		}
@@ -52,7 +52,7 @@ public class ChatMessageHandler extends EttpMessageHandler {
 		ChatMessageType msgType = ChatMessageType.values()[msg.getMsgtype()];
 		switch (msgType) {
 			case LOBBY: {
-				sessions.chatToMainLobby(user, msg.getMsg());
+				multiplayer.chatToMainLobby(user, msg.getMsg());
 				break;
 			}
 			case ROOM: {
@@ -65,7 +65,7 @@ public class ChatMessageHandler extends EttpMessageHandler {
 				break;
 			}
 			case PRIVATE: {
-				sessions.privateMessage(user, msg.getTab(), msg.getMsg());
+				multiplayer.privateMessage(user, msg.getTab(), msg.getMsg());
 				break;
 			}
 			default:

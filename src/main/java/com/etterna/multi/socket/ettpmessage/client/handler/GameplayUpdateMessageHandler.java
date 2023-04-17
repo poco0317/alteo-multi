@@ -14,12 +14,12 @@ public class GameplayUpdateMessageHandler extends EttpMessageHandler {
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
 		GameplayUpdateMessage msg = readPayload(message, GameplayUpdateMessage.class);
-		UserSession user = sessions.getUserSession(session);
+		UserSession user = sessions.get(session);
 		if (user != null) {
 			user.setGameplayWife(msg.getWife());
 			user.setGameplayJudgments(msg.getJdgstr());
 			if (user.getLobby() != null) {
-				sessions.updateLobbyGameplay(user.getLobby());
+				multiplayer.updateLobbyGameplay(user.getLobby());
 			}
 		}
 	}

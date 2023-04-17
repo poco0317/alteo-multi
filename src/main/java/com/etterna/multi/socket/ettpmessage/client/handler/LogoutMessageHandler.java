@@ -11,7 +11,7 @@ public class LogoutMessageHandler extends EttpMessageHandler {
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
-		sessions.killSession(session);
+		multiplayer.killSession(session);
 	}
 
 }

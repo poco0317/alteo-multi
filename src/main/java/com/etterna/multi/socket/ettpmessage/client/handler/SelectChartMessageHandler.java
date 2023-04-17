@@ -16,7 +16,7 @@ public class SelectChartMessageHandler extends EttpMessageHandler {
 	public void handle(WebSocketSession session, EttpMessage message) {
 		SelectChartMessage msg = readPayload(message, SelectChartMessage.class);
 		
-		UserSession user = sessions.getUserSession(session);
+		UserSession user = sessions.get(session);
 		if (user == null) {
 			return;
 		}
@@ -29,7 +29,7 @@ public class SelectChartMessageHandler extends EttpMessageHandler {
 			return;
 		}
 		
-		sessions.selectChart(user, msg);
+		multiplayer.selectChart(user, msg);
 	}
 
 }

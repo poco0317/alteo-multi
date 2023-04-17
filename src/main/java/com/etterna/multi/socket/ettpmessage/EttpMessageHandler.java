@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.services.CommandService;
 import com.etterna.multi.services.EttpResponseMessageService;
+import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.SessionService;
 
 /**
@@ -22,6 +23,9 @@ public abstract class EttpMessageHandler {
 	
 	@Autowired
 	protected SessionService sessions;
+	
+	@Autowired
+	protected MultiplayerService multiplayer;
 	
 	@Autowired
 	protected EttpResponseMessageService responder;

@@ -17,7 +17,7 @@ public class HelloMessageHandler extends EttpMessageHandler {
 	public void handle(WebSocketSession session, EttpMessage message) {
 		HelloMessage msg = readPayload(message, HelloMessage.class);
 		
-		sessions.clientHello(session, msg);
+		multiplayer.clientHello(session, msg);
 	}
 	
 	/**

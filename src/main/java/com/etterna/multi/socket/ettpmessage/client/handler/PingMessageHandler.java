@@ -11,10 +11,9 @@ public class PingMessageHandler extends EttpMessageHandler {
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
-		m_logger.debug("ping {}", session.getId());
+		sessions.ping(session);
 		
+		m_logger.info("ping {}", session.getId());
 	}
-	
-	
 
 }

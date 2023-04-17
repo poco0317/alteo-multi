@@ -15,7 +15,7 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 	public void handle(WebSocketSession session, EttpMessage message) {
 		CreateRoomMessage msg = readPayload(message, CreateRoomMessage.class);
 		
-		UserSession user = sessions.getUserSession(session);
+		UserSession user = sessions.get(session);
 		if (user == null || user.getUsername() == null) {
 			return;
 		}
@@ -25,8 +25,8 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 			return;
 		}
 		
-		sessions.removeFromLobby(user);
-		if (sessions.createLobby(session, msg)) {
+		multiplayer.removeFromLobby(user);
+		if (multiplayer.createLobby(session, msg)) {
 			responder.respond(session, "createroom", new CreateRoomResponseMessage(true));
 			responder.systemNoticeToUser(user, "Created room '"+msg.getName()+"'", msg.getName());
 		} else {

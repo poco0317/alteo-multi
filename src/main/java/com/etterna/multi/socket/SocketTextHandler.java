@@ -12,6 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.amazonaws.util.json.Jackson;
+import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
@@ -26,6 +27,9 @@ public class SocketTextHandler extends TextWebSocketHandler {
 	
 	@Autowired
 	private ApplicationContext ctx;
+	
+	@Autowired
+	private MultiplayerService multiplayer;
 	
 	@Autowired
 	private SessionService sessions;
@@ -65,15 +69,21 @@ public class SocketTextHandler extends TextWebSocketHandler {
 	}
 	
 	@Override
+	public void handleTransportError(WebSocketSession session, Throwable exc) {
+		m_logger.error("Transport error occurred - closing session: "+exc.getMessage(), exc);
+		multiplayer.killSession(session);
+	}
+	
+	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		m_logger.info("Session closed - status {} - {}", status.getCode(), status.getReason());
-		sessions.killSession(session);
+		multiplayer.killSession(session);
 	}
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
 		m_logger.info("New session received - {}", session.getId());
-		sessions.registerGeneralSession(session);
+		sessions.register(session);
 		hello.hello(session);
 	}
 

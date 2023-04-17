@@ -15,13 +15,13 @@ public class StartChartMessageHandler extends EttpMessageHandler {
 	public void handle(WebSocketSession session, EttpMessage message) {
 		StartChartMessage msg = readPayload(message, StartChartMessage.class);
 		
-		UserSession user = sessions.getUserSession(session);
+		UserSession user = sessions.get(session);
 		if (user != null && user.getLobby() != null) {
 			if (user.getLobby().canSelect(user)) {
 				String errors = user.getLobby().canStart(user);
 				if (errors == null || errors.isBlank()) {
-					sessions.startChart(user, msg);
-					sessions.broadcastLobbyUpdate(user.getLobby());
+					multiplayer.startChart(user, msg);
+					multiplayer.broadcastLobbyUpdate(user.getLobby());
 				} else {
 					responder.systemNoticeToEntireLobby(user.getLobby(), "Can't start ("+errors+")");
 				}

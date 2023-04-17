@@ -15,7 +15,7 @@ public class LoginMessageHandler extends EttpMessageHandler {
 		LoginMessage msg = readPayload(message, LoginMessage.class);
 		
 		
-		boolean success = sessions.createLoginSession(msg.getUser(), msg.getPass(), session);
+		boolean success = multiplayer.createLoginSession(msg.getUser(), msg.getPass(), session);
 		LoginResponseMessage response = new LoginResponseMessage();
 		
 		if (success) {

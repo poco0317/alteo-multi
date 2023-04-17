@@ -32,6 +32,9 @@ public class CommandService {
 	private HashMap<String, Method> commands = new HashMap<>();
 	
 	@Autowired
+	private MultiplayerService multiplayer;
+	
+	@Autowired
 	private SessionService sessions;
 	
 	@Autowired
@@ -59,10 +62,17 @@ public class CommandService {
 		CommandData data = new CommandData();
 		data.setArgs(args);
 		data.setMsgData(msg);
-		data.setSession(session);
 		
 		try {
-			commandMethod.invoke(this, data);
+			if (commandMethod.getParameterCount() == 1) {
+				commandMethod.invoke(this, data);
+			} else if (commandMethod.getParameterCount() == 2) {
+				UserSession user = sessions.get(session);
+				commandMethod.invoke(this, data, user);
+			} else {
+				m_logger.error("Command {} attempted with bad argument count", cmd);
+				return false;
+			}
 			return true;
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			// TODO Auto-generated catch block
@@ -80,12 +90,12 @@ public class CommandService {
 	private void chat(UserSession user, String tab, int msgType, String message) {
 		if (tab == null || tab.isBlank() || msgType == ChatMessageType.LOBBY.num()) {
 			// this might be going to the public lobby
-			sessions.chatToMainLobby(user, message);
+			multiplayer.chatToMainLobby(user, message);
 		} else {
 			// a tab was specified
 			if (msgType == ChatMessageType.ROOM.num()) {
 				// this is a dm
-				sessions.privateMessage(user, tab, message);
+				multiplayer.privateMessage(user, tab, message);
 			} else {
 				// this is a room message
 				responder.userChatToLobby(user, message);
@@ -94,8 +104,7 @@ public class CommandService {
 	}
 	
 	
-	void cmd_pm(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_pm(CommandData data, UserSession user) {
 		List<String> args = data.getArgs();
 		if (args == null || args.size() == 0) {
 			return;
@@ -103,76 +112,67 @@ public class CommandService {
 		String recipient = args.get(0);
 		String message = Strings.join(args.subList(1, args.size()), ' ');
 		
-		sessions.privateMessage(user, recipient, message);
+		multiplayer.privateMessage(user, recipient, message);
 	}
 	
-	void cmd_wave(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_wave(CommandData data, UserSession user) {
 		final String tab = data.getMsgData().getTab();
 		final int msgType = data.getMsgData().getMsgtype();
 		final String wave = "( * ^ *) ノシ";
 		chat(user, tab, msgType, wave);
 	}
 	
-	void cmd_lenny(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_lenny(CommandData data, UserSession user) {
 		final String tab = data.getMsgData().getTab();
 		final int msgType = data.getMsgData().getMsgtype();
 		final String lenny = "( ͡° ͜ʖ ͡°)";
 		chat(user, tab, msgType, lenny);
 	}
 	
-	void cmd_shrug(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_shrug(CommandData data, UserSession user) {
 		final String tab = data.getMsgData().getTab();
 		final int msgType = data.getMsgData().getMsgtype();
 		final String shrug = "¯\\_(ツ)_/";
 		chat(user, tab, msgType, shrug);
 	}
 	
-	void cmd_help(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_help(CommandData data, UserSession user) {
 		responder.systemNoticeToUser(user, "I didn't write help yet", "");
 	}
 	
-	void cmd_ready(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_ready(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 			return;
 		}
-		sessions.toggleReady(user);
+		multiplayer.toggleReady(user);
 	}
 	
-	void cmd_force(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_force(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 		}
-		sessions.toggleForce(user);
+		multiplayer.toggleForce(user);
 	}
 	
-	void cmd_free(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_free(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 		}
-		sessions.toggleFreepick(user);
+		multiplayer.toggleFreepick(user);
 	}
 	
-	void cmd_freerate(CommandData data) {
-		UserSession user = sessions.getUserSession(data.getSession());
+	void cmd_freerate(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
 		}
-		sessions.toggleFreerate(user);
+		multiplayer.toggleFreerate(user);
 	}
 	
 	
 	private class CommandData {
 		private List<String> args;
 		private ChatMessage msgData;
-		private WebSocketSession session;
 		public List<String> getArgs() {
 			return args;
 		}
@@ -184,12 +184,6 @@ public class CommandService {
 		}
 		public void setMsgData(ChatMessage msgData) {
 			this.msgData = msgData;
-		}
-		public WebSocketSession getSession() {
-			return session;
-		}
-		public void setSession(WebSocketSession session) {
-			this.session = session;
 		}
 	}
 
