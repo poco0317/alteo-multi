@@ -57,6 +57,7 @@ public class MultiplayerService {
 	
 	@Scheduled(fixedDelay = SessionService.MILLIS_BETWEEN_STANDARD_HEARTBEAT)
 	private void keepaliveSessions() {
+		if (sessionService.getSessionCount() == 0) return;
 		m_logger.debug("Pinging sessions - {} sessions", sessionService.getSessionCount());
 
 		List<UserSession> deadSessions = sessionService.getSessionsWithOldPing();

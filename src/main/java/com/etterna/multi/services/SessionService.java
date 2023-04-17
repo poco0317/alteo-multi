@@ -30,6 +30,7 @@ public class SessionService {
 
 	@Scheduled(fixedDelay = 1000L * 10L)
 	private void maintainSessions() {
+		if (getSessionCount() == 0) return;
 		m_logger.debug("Running session maintenance - {} sessions", getSessionCount());
 
 		// prune forgotten dead sessions and logins
