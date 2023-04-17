@@ -1,0 +1,19 @@
+server:
+  port: ${SOCKET_PORT}
+spring:
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+      show_sql: true
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+  datasource:
+    driver-class-name: ${DB_DRIVER}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    url: ${DB_URL}
+
+logging:
+  level:
+    #org.hibernate.SQL: DEBUG
+    com.etterna: DEBUG
