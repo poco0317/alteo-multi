@@ -23,13 +23,13 @@ public class StartChartMessageHandler extends EttpMessageHandler {
 					multiplayer.startChart(user, msg);
 					multiplayer.broadcastLobbyUpdate(user.getLobby());
 				} else {
-					responder.systemNoticeToEntireLobby(user.getLobby(), "Can't start ("+errors+")");
+					responder.systemNoticeToLobby(user.getLobby(), "Can't start ("+errors+")");
 				}
 			} else {
-				responder.systemNoticeToUser(user, "You don't have the rights to start a chart!", user.getLobby().getName());
+				responder.systemNoticeToUserInPrivate(user, "You don't have the rights to start a chart!", user.getLobby().getName());
 			}
 		} else if (user.getLobby() == null) {
-			responder.systemNoticeToUserInMainLobby(user, "You aren't in a room.");
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a room.");
 		}
 	}
 

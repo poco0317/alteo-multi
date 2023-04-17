@@ -3,6 +3,8 @@ package com.etterna.multi.services;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.etterna.multi.data.state.Chart;
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.LobbyState;
 import com.etterna.multi.data.state.PlayerState;
@@ -30,6 +33,9 @@ public class LobbyService {
 
 	// room names to lobbies
 	private ConcurrentHashMap<String, Lobby> rooms = new ConcurrentHashMap<>();
+	
+	// countdown threads
+	private ConcurrentHashMap<String, Thread> countdowns = new ConcurrentHashMap<>();
 	
 	/**
 	 * Get the lobby by name
@@ -142,6 +148,9 @@ public class LobbyService {
 		m_logger.info("Player {} left lobby {} - {} users left", user.getUsername(), lobby.getName(), lobby.getPlayers().size());
 	}
 	
+	/*
+	 * Set the lobby state to selecting a song unless someone is ingame
+	 */
 	public void updateLobbyState(Lobby lobby) {
 		if (lobby == null) return;
 		
@@ -156,6 +165,59 @@ public class LobbyService {
 			lobby.setPlaying(false);
 			lobby.setChart(null);
 		}
+	}
+	
+	public void startChart(Lobby lobby, Chart chart) {
+		lobby.getPlayers().forEach(p -> p.setReady(false));
+		lobby.setForcestart(false);
+		lobby.setChart(chart);
+		lobby.setState(LobbyState.INGAME);
+		lobby.setPlaying(true);
+	}
+	
+	/**
+	 * Requires a given BiConsumer (lambda with 2 params), where the second parameter is true
+	 * when the countdown has finished. Otherwise, it triggers once a second with false.
+	 * <br>The first parameter is the number of seconds left in the countdown.
+	 */
+	public boolean startCountdown(Lobby lobby, BiConsumer<Integer, Boolean> f) {
+		if (lobby == null || lobby.isInCountdown() 
+				|| countdowns.containsKey(lobby.getName())) {
+			return false;
+		}
+		final String name = lobby.getName();
+		
+		lobby.setInCountdown(true);
+		Runnable work = new Runnable() {
+			public void run() {
+				int left = lobby.getTimer();
+				while (left > 0) {
+					f.accept(left, false);
+					left--;
+					try {
+						Thread.sleep(1000L);
+					} catch (Exception e) {}
+				}
+				lobby.setInCountdown(false);
+				countdowns.remove(name);
+				f.accept(0, true);
+			}
+		};
+		Thread t = new Thread(work);
+		countdowns.put(name, t);
+		t.start();
+		
+		return true;
+	}
+	
+	public void stopCountdown(Lobby lobby) {
+		if (lobby == null || !countdowns.containsKey(lobby.getName())) {
+			return;
+		}
+		try {
+			countdowns.get(lobby.getName()).interrupt();
+		} catch (Exception e) {}
+		countdowns.remove(lobby.getName());
 	}
 	
 }

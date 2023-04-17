@@ -79,7 +79,7 @@ public class EttpResponseMessageService {
 	 * Send a system notice in chat that only a specific user can see.
 	 * Either send in DM or in a room. Leave last parameter null or blank to send in DM. 
 	 */
-	public void systemNoticeToUser(UserSession user, String message, String roomToSendTo) {
+	public void systemNoticeToUserInPrivate(UserSession user, String message, String roomToSendTo) {
 		if (user == null) return;
 		String tab = "";
 		if (roomToSendTo != null) {
@@ -91,7 +91,7 @@ public class EttpResponseMessageService {
 	/**
 	 * Send a system notice to a user in the main lobby
 	 */
-	public void systemNoticeToUserInMainLobby(UserSession user, String message) {
+	public void systemNoticeToUserInGlobalChat(UserSession user, String message) {
 		if (user == null) return;
 		respond(user.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage("", ChatMessageType.LOBBY, ColorUtil.system(message)));
 	}
@@ -99,7 +99,7 @@ public class EttpResponseMessageService {
 	/**
 	 * Send a system notice to everyone in a room
 	 */
-	public void systemNoticeToEntireLobby(Lobby lobby, String message) {
+	public void systemNoticeToLobby(Lobby lobby, String message) {
 		if (lobby == null) return;
 		respondToLobby(lobby, CHAT_RESPONSE_TYPE, makeChatMessage(lobby.getName(), ChatMessageType.ROOM, ColorUtil.system(message)));
 	}
@@ -131,7 +131,7 @@ public class EttpResponseMessageService {
 	 * This should be called via SessionService.chatToMainLobby
 	 * Invoking this directly just sends a user their own message.
 	 */
-	public void userChatToMainLobby(UserSession recipient, final String senderName, String message) {
+	public void userChatToGlobalChat(UserSession recipient, final String senderName, String message) {
 		if (recipient == null || recipient.getUsername() == null || senderName == null) return;
 		String msgLine = senderName + ": " + message;
 		respond(recipient.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage("", ChatMessageType.LOBBY, msgLine));

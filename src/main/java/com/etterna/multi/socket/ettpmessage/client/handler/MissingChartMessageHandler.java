@@ -17,7 +17,7 @@ public class MissingChartMessageHandler extends EttpMessageHandler {
 			return;
 		}
 		
-		responder.systemNoticeToEntireLobby(user.getLobby(), user.getUsername() + " doesn't have the chart.");
+		responder.systemNoticeToLobby(user.getLobby(), user.getUsername() + " doesn't have the chart.");
 	}
 
 }

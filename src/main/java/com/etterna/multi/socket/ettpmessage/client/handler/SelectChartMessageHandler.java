@@ -21,11 +21,11 @@ public class SelectChartMessageHandler extends EttpMessageHandler {
 			return;
 		}
 		if (user.getLobby() == null) {
-			responder.systemNoticeToUserInMainLobby(user, ColorUtil.system("You are not in a room"));
+			responder.systemNoticeToUserInGlobalChat(user, ColorUtil.system("You are not in a room"));
 			return;
 		}
 		if (!user.getLobby().canSelect(user)) {
-			responder.systemNoticeToUser(user, ColorUtil.system("You don't have the rights to select a chart!"), user.getLobby().getName());
+			responder.systemNoticeToUserInPrivate(user, ColorUtil.system("You don't have the rights to select a chart!"), user.getLobby().getName());
 			return;
 		}
 		

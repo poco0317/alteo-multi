@@ -18,7 +18,7 @@ public class ChatMessageHandler extends EttpMessageHandler {
 		ChatMessage msg = readPayload(message, ChatMessage.class);
 		
 		UserSession user = sessions.get(session);
-		if (user == null || user.getUsername() == null) {
+		if (user == null || user.getUsername() == null || msg.getMsg() == null || msg.getMsg().isBlank()) {
 			return;
 		}
 		
@@ -58,7 +58,7 @@ public class ChatMessageHandler extends EttpMessageHandler {
 			case ROOM: {
 				Lobby lobby = user.getLobby();
 				if (lobby == null || !lobby.getName().equals(msg.getTab())) {
-					responder.systemNoticeToUser(user, "You're not in the room '"+msg.getTab()+"'", msg.getTab());
+					responder.systemNoticeToUserInPrivate(user, "You're not in the room '"+msg.getTab()+"'", msg.getTab());
 					return;
 				}
 				responder.userChatToLobby(user, msg.getMsg());

@@ -137,12 +137,12 @@ public class CommandService {
 	}
 	
 	void cmd_help(CommandData data, UserSession user) {
-		responder.systemNoticeToUser(user, "I didn't write help yet", "");
+		responder.systemNoticeToUserInPrivate(user, "I didn't write help yet", "");
 	}
 	
 	void cmd_ready(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
-			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 			return;
 		}
 		multiplayer.toggleReady(user);
@@ -150,21 +150,21 @@ public class CommandService {
 	
 	void cmd_force(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
-			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 		}
 		multiplayer.toggleForce(user);
 	}
 	
 	void cmd_free(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
-			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 		}
 		multiplayer.toggleFreepick(user);
 	}
 	
 	void cmd_freerate(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
-			responder.systemNoticeToUserInMainLobby(user, "You aren't in a lobby");
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 		}
 		multiplayer.toggleFreerate(user);
 	}
