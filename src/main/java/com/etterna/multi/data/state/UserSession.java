@@ -88,8 +88,7 @@ public class UserSession {
 	}
 	@Override
 	public int hashCode() {
-		return Objects.hash(client, ettpcVersion, gameplayJudgments, gameplayWife, isReady, lastPing, lobby, packs,
-				session, state, username);
+		return Objects.hash(session, username);
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -100,12 +99,7 @@ public class UserSession {
 		if (getClass() != obj.getClass())
 			return false;
 		UserSession other = (UserSession) obj;
-		return Objects.equals(client, other.client) && ettpcVersion == other.ettpcVersion
-				&& Objects.equals(gameplayJudgments, other.gameplayJudgments)
-				&& Double.doubleToLongBits(gameplayWife) == Double.doubleToLongBits(other.gameplayWife)
-				&& isReady == other.isReady && lastPing == other.lastPing && Objects.equals(lobby, other.lobby)
-				&& Objects.equals(packs, other.packs) && Objects.equals(session, other.session) && state == other.state
-				&& Objects.equals(username, other.username);
+		return session.equals(other.session);
 	}
 
 }
