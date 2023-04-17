@@ -56,6 +56,7 @@ public class SocketTextHandler extends TextWebSocketHandler {
 			Class<? extends EttpMessageHandler> handlerClass = EttpMessageType.valueOf(ettpMessage.getType().toUpperCase()).getLinkedClass();
 			try {
 				m_logger.debug("Handling incoming message type: {}", ettpMessage.getType());
+				multiplayer.pingSession(session);
 				ctx.getBean(handlerClass).handle(session, ettpMessage);
 			} catch (Exception e) {
 				m_logger.error(e.getMessage(), e);
