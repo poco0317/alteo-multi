@@ -59,9 +59,9 @@ public class SocketTextHandler extends TextWebSocketHandler {
 		}
 		
 		if (message.getPayload() != null && message.getPayload().contains("pass")) {
-			m_logger.info("Got message type: {}", ettpMessage.getType());
+			m_logger.debug("Got message type: {}", ettpMessage.getType());
 		} else {
-			m_logger.info("Got message: {}", message.getPayload());
+			m_logger.debug("Got message: {}", message.getPayload());
 		}
 		
 		try {
