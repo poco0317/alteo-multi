@@ -1,5 +1,7 @@
 package com.etterna.multi.socket.ettpmessage.client.handler;
 
+import java.io.IOException;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -14,7 +16,7 @@ import com.etterna.multi.socket.ettpmessage.client.payload.ChatMessage;
 public class ChatMessageHandler extends EttpMessageHandler {
 	
 	@Override
-	public void handle(WebSocketSession session, EttpMessage message) {
+	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
 		ChatMessage msg = readPayload(message, ChatMessage.class);
 		
 		UserSession user = sessions.get(session);

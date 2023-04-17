@@ -1,5 +1,7 @@
 package com.etterna.multi.socket.ettpmessage.client.handler;
 
+import java.io.IOException;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -14,7 +16,7 @@ public class HelloMessageHandler extends EttpMessageHandler {
 	private static final int SERVER_VERSION = 5;
 	
 	@Override
-	public void handle(WebSocketSession session, EttpMessage message) {
+	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
 		HelloMessage msg = readPayload(message, HelloMessage.class);
 		
 		multiplayer.clientHello(session, msg);

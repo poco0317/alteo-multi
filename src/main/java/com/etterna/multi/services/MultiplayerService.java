@@ -353,12 +353,12 @@ public class MultiplayerService {
 		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
 		Integer rate = response.getChart().getRate();
 		String ratestr = rate != null ? String.format("%.2f", rate / 1000.0) : "";
-		String chatmsg = String.format("%s selected %s (%s) %s %s",
+		String chatmsg = String.format("%s selected %s (%s) - %sx%s",
 				user.getUsername(),
 				chart.getTitle(),
 				chart.getDifficulty(),
 				ratestr,
-				msg.getPack() != null ? msg.getPack() : "");
+				msg.getPack() != null ? " - "+msg.getPack() : "");
 		responder.respondToLobby(lobby, "selectchart", response);
 		responder.systemNoticeToLobby(lobby, chatmsg);
 	}

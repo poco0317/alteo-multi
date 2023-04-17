@@ -1,15 +1,18 @@
 package com.etterna.multi.socket.ettpmessage;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.services.CommandService;
 import com.etterna.multi.services.EttpResponseMessageService;
 import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.SessionService;
+import com.etterna.util.Util;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base handler for all EttpMessages.
@@ -20,6 +23,7 @@ import com.etterna.multi.services.SessionService;
 public abstract class EttpMessageHandler {
 	
 	protected static final Logger m_logger = LoggerFactory.getLogger(EttpMessageHandler.class);
+	protected static final ObjectMapper mapper = Util.objectMapper();
 	
 	@Autowired
 	protected SessionService sessions;
@@ -33,10 +37,10 @@ public abstract class EttpMessageHandler {
 	@Autowired
 	protected CommandService commands;
 	
-	public static <T> T readPayload(EttpMessage msg, Class<T> clz) {
-		return Jackson.fromJsonString(Jackson.toJsonString(msg.getPayload()), clz);
+	public static <T> T readPayload(EttpMessage msg, Class<T> clz) throws IOException {
+		return mapper.readerFor(clz).readValue(mapper.writer().writeValueAsString(msg.getPayload()));
 	}
 	
-	public abstract void handle(WebSocketSession session, EttpMessage message);
+	public abstract void handle(WebSocketSession session, EttpMessage message) throws IOException;
 
 }

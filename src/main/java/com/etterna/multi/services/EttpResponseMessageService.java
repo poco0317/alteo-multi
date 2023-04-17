@@ -8,12 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
 import com.etterna.multi.socket.ettpmessage.ChatMessageType;
 import com.etterna.multi.socket.ettpmessage.EttpMessageResponse;
 import com.etterna.multi.socket.ettpmessage.client.payload.ChatMessage;
+import com.etterna.util.Util;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class EttpResponseMessageService {
@@ -21,6 +22,8 @@ public class EttpResponseMessageService {
 	private static final Logger m_logger = LoggerFactory.getLogger(EttpResponseMessageService.class);
 
 	private static final String CHAT_RESPONSE_TYPE = "chat";
+	
+	private static final ObjectMapper mapper = Util.objectMapper();
 	
 	/**
 	 * Send a particular data carrying message to a given session
@@ -31,7 +34,7 @@ public class EttpResponseMessageService {
 			EttpMessageResponse<T> response = new EttpMessageResponse<>();
 			response.setPayload(ettpMessageResponse);
 			response.setType(messageType);
-			session.sendMessage(new TextMessage(Jackson.toJsonString(response)));
+			session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
 		} catch (Exception e) {
 			m_logger.error(e.getMessage(), e);
 		}

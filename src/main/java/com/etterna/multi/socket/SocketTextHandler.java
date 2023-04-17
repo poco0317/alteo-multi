@@ -11,19 +11,23 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.amazonaws.util.json.Jackson;
 import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.EttpMessageType;
 import com.etterna.multi.socket.ettpmessage.client.handler.HelloMessageHandler;
+import com.etterna.util.Util;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @Scope("prototype")
 public class SocketTextHandler extends TextWebSocketHandler {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(SocketTextHandler.class);
+	
+	private static final ObjectMapper mapper = Util.objectMapper();
 	
 	@Autowired
 	private ApplicationContext ctx;
@@ -40,7 +44,15 @@ public class SocketTextHandler extends TextWebSocketHandler {
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message) {
 		
-		EttpMessage ettpMessage = Jackson.fromJsonString(message.getPayload(), EttpMessage.class);
+		EttpMessage ettpMessage;
+		try {
+			ettpMessage = mapper.readerFor(EttpMessage.class).readValue(message.getPayload());
+		} catch (JsonProcessingException e) {
+			m_logger.error("Failed to process message - "+e.getMessage(), e);
+			multiplayer.killSession(session);
+			return;
+		}
+		
 		if (ettpMessage == null) {
 			m_logger.warn("Failed to parse incoming message: {}", message.getPayload());
 			return;
@@ -60,6 +72,7 @@ public class SocketTextHandler extends TextWebSocketHandler {
 				ctx.getBean(handlerClass).handle(session, ettpMessage);
 			} catch (Exception e) {
 				m_logger.error(e.getMessage(), e);
+				multiplayer.killSession(session);
 				return;
 			}
 		} catch (Exception e) {

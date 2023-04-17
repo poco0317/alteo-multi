@@ -1,5 +1,7 @@
 package com.etterna.multi.socket.ettpmessage.client.handler;
 
+import java.io.IOException;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -12,7 +14,7 @@ import com.etterna.multi.socket.ettpmessage.client.payload.StartChartMessage;
 public class StartChartMessageHandler extends EttpMessageHandler {
 	
 	@Override
-	public void handle(WebSocketSession session, EttpMessage message) {
+	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
 		StartChartMessage msg = readPayload(message, StartChartMessage.class);
 		
 		UserSession user = sessions.get(session);
