@@ -9,6 +9,8 @@ COPY src src
 
 USER root
 
+EXPOSE 8765/tcp
+
 RUN chmod +x ./mvnw
 RUN ./mvnw dependency:go-offline
 
