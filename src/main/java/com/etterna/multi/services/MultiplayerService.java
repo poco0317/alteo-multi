@@ -299,13 +299,13 @@ public class MultiplayerService {
 	
 	public void broadcastConnectedUserLobbylistRemoval(UserSession leaver) {
 		LobbyUserlistUpdateResponseMessage response = new LobbyUserlistUpdateResponseMessage();
-		response.setOff(leaver.getUsername());
+		response.addOff(leaver.getUsername());
 		respondAllSessions("lobbyuserlistupdate", response);
 	}
 	
 	public void broadcastConnectedUserLobbylistAddition(UserSession joiner) {
 		LobbyUserlistUpdateResponseMessage response = new LobbyUserlistUpdateResponseMessage();
-		response.setOn(joiner.getUsername());
+		response.addOn(joiner.getUsername());
 		respondAllSessions("lobbyuserlistupdate", response);
 	}
 	
