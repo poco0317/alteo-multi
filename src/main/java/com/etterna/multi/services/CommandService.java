@@ -127,7 +127,7 @@ public class CommandService {
 			multiplayer.chatToMainLobby(user, message);
 		} else {
 			// a tab was specified
-			if (msgType == ChatMessageType.ROOM.num()) {
+			if (msgType == ChatMessageType.PRIVATE.num()) {
 				// this is a dm
 				multiplayer.privateMessage(user, tab, message);
 			} else {
