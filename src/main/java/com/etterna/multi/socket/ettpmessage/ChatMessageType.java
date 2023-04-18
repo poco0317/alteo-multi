@@ -8,6 +8,19 @@ public enum ChatMessageType {
 	
 	private int num;
 	
+	public static ChatMessageType fromInt(int i) {
+		switch (i) {
+			case 0:
+				return LOBBY;
+			case 1:
+				return ROOM;
+			case 2:
+				return PRIVATE;
+			default:
+				return LOBBY;
+		}
+	}
+	
 	private ChatMessageType(int num) {
 		this.num = num;
 	}
