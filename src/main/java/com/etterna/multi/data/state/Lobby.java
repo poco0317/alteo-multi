@@ -32,6 +32,8 @@ public class Lobby {
 	private Set<UserSession> operators = new HashSet<>();
 	private Set<UserSession> players = new HashSet<>();
 	
+	private Set<String> bannedUsers = new HashSet<>();
+	
 	public boolean canSelect(UserSession user) {
 		return freepick || isOwner(user) || isOperator(user); 
 	}
@@ -132,6 +134,18 @@ public class Lobby {
 			dto.setRate(chart.getRate());
 		}
 		return dto;
+	}
+	
+	public void addBannedUser(String user) {
+		bannedUsers.add(user.toLowerCase());
+	}
+	
+	public boolean isBanned(String user) {
+		return bannedUsers.contains(user.toLowerCase());
+	}
+	
+	public void unban(String user) {
+		bannedUsers.remove(user.toLowerCase());
 	}
 	
 	public void enter(UserSession user) {

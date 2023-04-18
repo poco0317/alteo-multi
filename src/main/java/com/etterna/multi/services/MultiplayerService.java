@@ -250,6 +250,11 @@ public class MultiplayerService {
 	public boolean tryToJoinLobby(UserSession user, String name, String password) {
 		Lobby lobby = lobbyService.getLobbyByName(name);
 		if (lobby != null) {
+			if (lobby.isBanned(user.getUsername())) {
+				responder.systemNoticeToUserInGlobalChat(user, "You are banned from '"+name+"'");
+				return false;
+			}
+			
 			if (lobby.getPassword() == null || lobby.getPassword().isBlank()) {
 				// no password, come on in
 				enterLobby(user, lobby);
@@ -484,6 +489,55 @@ public class MultiplayerService {
 		LeaderboardResponseMessage response = new LeaderboardResponseMessage(lobby);
 		responder.respondToLobby(lobby, "leaderboard", response);
 	}
+	
+	public void banFromLobby(UserSession executor, String recipient) {
+		if (executor == null || executor.getLobby() == null) return;
+		
+		Lobby lobby = executor.getLobby();
+		if (lobby.isOperOrOwner(executor)) {
+			UserSession target = sessionService.getByUsername(recipient);
+			if (target == null) {
+				responder.systemNoticeToUserInRoom(executor, "'"+recipient+"' is not online.", lobby.getName());
+				return;
+			}
+			
+			if (target.equals(executor)) {
+				responder.systemNoticeToUserInRoom(executor, "You can't kick/ban yourself.", lobby.getName());
+				return;
+			}
+			
+			if (!lobby.isOwner(executor) && lobby.isOperOrOwner(target)) {
+				// an oper cant kick another oper or the owner
+				responder.systemNoticeToUserInRoom(executor, "You can't kick/ban another operator or owner.", lobby.getName());
+				return;
+			}
+			
+			lobby.addBannedUser(recipient);
+			removeFromLobby(target);
+			responder.systemNoticeToLobby(lobby, executor.getUsername() + " banned "+recipient+" from the room.");
+		} else {
+			responder.systemNoticeToUserInRoom(executor, "You don't have permission to kick/ban a user.", lobby.getName());
+		}
+	}
+	
+	public void unbanFromLobby(UserSession executor, String recipient) {
+		if (executor == null || executor.getLobby() == null) return;
+		
+		Lobby lobby = executor.getLobby();
+		if (lobby.isOperOrOwner(executor)) {
+			UserSession target = sessionService.getByUsername(recipient);
+			if (target == null) {
+				responder.systemNoticeToUserInRoom(executor, "'"+recipient+"' is not online.", lobby.getName());
+				return;
+			}
+			
+			lobby.unban(recipient);
+			responder.systemNoticeToLobby(lobby, executor.getUsername() + " unbanned "+recipient+" from the room.");
+		} else {
+			responder.systemNoticeToUserInRoom(executor, "You don't have permission to unban a user.", lobby.getName());
+		}
+	}
+	
 	
 	/**
 	 * A client talks to the server for the first time to inform of generic client information

@@ -78,6 +78,22 @@ public class EttpResponseMessageService {
 		return chatMessage;
 	}
 	
+	public void systemNoticeToUserInContext(UserSession user, String message, int msgType, String room) {
+		ChatMessageType chatMessageType = ChatMessageType.fromInt(msgType);
+		switch (chatMessageType) {
+			default:
+			case LOBBY:
+				systemNoticeToUserInGlobalChat(user, message);
+				break;
+			case ROOM:
+				systemNoticeToUserInRoom(user, message, room);
+				break;
+			case PRIVATE:
+				systemNoticeToUserInPrivate(user, message, room);
+				break;
+		}
+	}
+	
 	/**
 	 * Send a system notice in chat that only a specific user can see.
 	 * Creates a DM to send the message. Leaving the last parameter blank creates the System tab. 
@@ -95,7 +111,7 @@ public class EttpResponseMessageService {
 	 * Send a system notice in chat that only a specific user can see.
 	 * Meant specifically for a room instead of a DM.
 	 */
-	public void systemNoticetoUserInRoom(UserSession user, String message, String roomToSendTo) {
+	public void systemNoticeToUserInRoom(UserSession user, String message, String roomToSendTo) {
 		if (user == null) return;
 		String tab = "";
 		if (roomToSendTo != null) {

@@ -186,13 +186,8 @@ public class CommandService {
 			}
 			
 			final int msgType = data.getMsgData().getMsgtype();
-			if (msgType == ChatMessageType.ROOM.num()) {
-				responder.systemNoticetoUserInRoom(user, msg, data.getMsgData().getTab());
-			} else if (msgType == ChatMessageType.PRIVATE.num()) {
-				responder.systemNoticeToUserInPrivate(user, msg, data.getMsgData().getTab());
-			} else if (msgType == ChatMessageType.LOBBY.num()) {
-				responder.systemNoticeToUserInGlobalChat(user, msg);
-			}
+			final String tab = data.getMsgData().getTab();
+			responder.systemNoticeToUserInContext(user, msg, msgType, tab);
 			return;
 		}
 		
@@ -218,6 +213,7 @@ public class CommandService {
 	void cmd_force(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
+			return;
 		}
 		multiplayer.toggleForce(user);
 	}
@@ -226,6 +222,7 @@ public class CommandService {
 	void cmd_free(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
+			return;
 		}
 		multiplayer.toggleFreepick(user);
 	}
@@ -235,8 +232,38 @@ public class CommandService {
 	void cmd_freerate(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
+			return;
 		}
 		multiplayer.toggleFreerate(user);
+	}
+	
+	@CommandAlias(values = {"ban"})
+	@HelpMessage(desc = "Kick and ban a user from your room", usage = "/kick <user>", requiresOper = true)
+	void cmd_kick(CommandData data, UserSession user) {
+		if (user.getLobby() == null) {
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
+			return;
+		}
+		if (data.getArgs() == null && data.getArgs().size() == 0) {
+			responder.systemNoticeToUserInContext(user, "Please provide the name to kick.", data.getMsgData().getMsgtype(), data.getMsgData().getTab());
+			return;
+		}
+		
+		multiplayer.banFromLobby(user, data.getArgs().get(0));
+	}
+	
+	@HelpMessage(desc = "Unban a kicked/banned user from your room", usage = "/unban <user>", requiresOper = true)
+	void cmd_unban(CommandData data, UserSession user) {
+		if (user.getLobby() == null) {
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
+			return;
+		}
+		if (data.getArgs() == null && data.getArgs().size() == 0) {
+			responder.systemNoticeToUserInContext(user, "Please provide the name to kick.", data.getMsgData().getMsgtype(), data.getMsgData().getTab());
+			return;
+		}
+		
+		multiplayer.unbanFromLobby(user, data.getArgs().get(0));
 	}
 	
 	
