@@ -152,7 +152,7 @@ public class MultiplayerService {
 	 * Privately send a message to a sender and a receiver
 	 */
 	public void privateMessage(UserSession sender, String recipientName, String message) {
-		if (sender == null || recipientName == null || message == null || sender.getUsername() == null) {
+		if (sender == null || recipientName == null || message == null || sender.getUsername() == null || recipientName.isBlank() || message.isBlank()) {
 			return;
 		}
 		
@@ -160,7 +160,7 @@ public class MultiplayerService {
 		if (recipient != null) {
 			responder.userChatPrivatelyToUser(sender, recipient, message); 
 		} else {
-			responder.systemNoticeToUserInPrivate(sender, "Could not find user '"+recipientName+"'", "");
+			responder.systemNoticeToUserInPrivate(sender, "No user by the name of '"+recipientName+"' is online.", recipientName);
 		}
 	}
 	
@@ -439,9 +439,9 @@ public class MultiplayerService {
 		if (lobby.isOperOrOwner(user)) {
 			lobby.setForcestart(!lobby.isForcestart());
 			if (lobby.isForcestart()) {
-				responder.systemNoticeToLobby(lobby, "Force start is enabled for this song.");
+				responder.systemNoticeToLobby(lobby, user.getUsername() + " enabled force start for this song.");
 			} else {
-				responder.systemNoticeToLobby(lobby, "Force start is disabled.");
+				responder.systemNoticeToLobby(lobby, user.getUsername() + " disabled force start.");
 			}
 		} else {
 			responder.systemNoticeToUserInPrivate(user, "You can't set force start.", user.getLobby().getName());
@@ -454,9 +454,9 @@ public class MultiplayerService {
 		if (lobby.isOperOrOwner(user)) {
 			lobby.setFreepick(!lobby.isFreepick());
 			if (lobby.isFreepick()) {
-				responder.systemNoticeToLobby(lobby, "Freepick is enabled. Anyone can pick a song.");
+				responder.systemNoticeToLobby(lobby, user.getUsername() + " enabled freepick. Anyone can pick a song.");
 			} else {
-				responder.systemNoticeToLobby(lobby, "Freepick is disabled. Only Operators and the Owner can pick a song.");
+				responder.systemNoticeToLobby(lobby, user.getUsername() + " disabled freepick. Only Operators and the Owner can pick a song.");
 			}
 		} else {
 			responder.systemNoticeToUserInPrivate(user, "You can't set free song selection.", user.getLobby().getName());
@@ -469,9 +469,9 @@ public class MultiplayerService {
 		if (lobby.isOperOrOwner(user)) {
 			lobby.setFreerate(!lobby.isFreerate());
 			if (lobby.isFreerate()) {
-				responder.systemNoticeToLobby(lobby, "Freerate is enabled. You may pick any rate to play.");
+				responder.systemNoticeToLobby(lobby, user.getUsername() + " enabled freerate. You may pick any rate to play.");
 			} else {
-				responder.systemNoticeToLobby(lobby, "Freerate is disabled. The song selector picks the rate.");
+				responder.systemNoticeToLobby(lobby, user.getUsername() + " disabled freerate. The song selector picks the rate.");
 			}
 		} else {
 			responder.systemNoticeToUserInPrivate(user, "You can't set free rate selection.", user.getLobby().getName());

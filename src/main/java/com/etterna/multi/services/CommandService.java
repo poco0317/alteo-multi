@@ -2,6 +2,7 @@ package com.etterna.multi.services;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +46,43 @@ public class CommandService {
 		for (final Method m : this.getClass().getDeclaredMethods()) {
 			if (m.getName().startsWith(CMD_METHOD_PREFIX)) {
 				final String name = m.getName().substring(CMD_METHOD_PREFIX.length());
+				final CommandAlias cmdAlias = m.getAnnotation(CommandAlias.class);
 				m.setAccessible(true);
 				commands.put(name, m);
+				
+				if (cmdAlias != null) {
+					for (String alias : cmdAlias.values()) {
+						commands.put(alias, m);
+					}
+				}
 			}
 		}
+	}
+	
+	private String helpForCommand(String cmd, UserSession user) {
+		for (final Method method : CommandService.class.getDeclaredMethods()) {
+			if (method.getName().startsWith(CMD_METHOD_PREFIX)) {
+				final String name = method.getName().substring(CMD_METHOD_PREFIX.length());
+				if (name.equalsIgnoreCase(cmd)) {
+					HelpMessage msg = method.getAnnotation(HelpMessage.class);
+					if (msg != null) {
+						return msg.usage() + " - " + msg.desc();
+					}
+				}
+			}
+		}
+		return "/" + cmd;
+	}
+	
+	private List<String> helpForAllCommands(UserSession user) {
+		List<String> l = new ArrayList<>();
+		for (Method method : CommandService.class.getDeclaredMethods()) {
+			HelpMessage msg = method.getAnnotation(HelpMessage.class);
+			if (msg != null) {
+				l.add(msg.usage() + " - " + msg.desc());
+			}
+		}
+		return l;
 	}
 	
 	public boolean execute(WebSocketSession session, ChatMessage msg, String cmd, String[] args) {
@@ -103,7 +137,8 @@ public class CommandService {
 		}
 	}
 	
-	
+	@CommandAlias(values = {"dm", "msg"})
+	@HelpMessage(desc = "Send a private message to a user in a new private tab", usage = "/pm <username> <message>")
 	void cmd_pm(CommandData data, UserSession user) {
 		List<String> args = data.getArgs();
 		if (args == null || args.size() == 0) {
@@ -115,6 +150,7 @@ public class CommandService {
 		multiplayer.privateMessage(user, recipient, message);
 	}
 	
+	@HelpMessage(desc = "Wave", usage = "/wave")
 	void cmd_wave(CommandData data, UserSession user) {
 		final String tab = data.getMsgData().getTab();
 		final int msgType = data.getMsgData().getMsgtype();
@@ -122,6 +158,7 @@ public class CommandService {
 		chat(user, tab, msgType, wave);
 	}
 	
+	@HelpMessage(desc = "Lenny", usage = "/lenny")
 	void cmd_lenny(CommandData data, UserSession user) {
 		final String tab = data.getMsgData().getTab();
 		final int msgType = data.getMsgData().getMsgtype();
@@ -129,6 +166,7 @@ public class CommandService {
 		chat(user, tab, msgType, lenny);
 	}
 	
+	@HelpMessage(desc = "Shrug", usage = "/shrug")
 	void cmd_shrug(CommandData data, UserSession user) {
 		final String tab = data.getMsgData().getTab();
 		final int msgType = data.getMsgData().getMsgtype();
@@ -137,9 +175,37 @@ public class CommandService {
 	}
 	
 	void cmd_help(CommandData data, UserSession user) {
-		responder.systemNoticeToUserInPrivate(user, "I didn't write help yet", "");
+		final List<String> args = data.getArgs();
+		if (args != null && args.size() >= 1) {
+			String helpmsg = helpForCommand(args.get(0), user);
+			String msg = "";
+			if (helpmsg != null) {
+				msg = helpmsg;
+			} else {
+				msg = "Command '"+args.get(0)+"' not found";
+			}
+			
+			final int msgType = data.getMsgData().getMsgtype();
+			if (msgType == ChatMessageType.ROOM.num()) {
+				responder.systemNoticetoUserInRoom(user, msg, data.getMsgData().getTab());
+			} else if (msgType == ChatMessageType.PRIVATE.num()) {
+				responder.systemNoticeToUserInPrivate(user, msg, data.getMsgData().getTab());
+			} else if (msgType == ChatMessageType.LOBBY.num()) {
+				responder.systemNoticeToUserInGlobalChat(user, msg);
+			}
+			return;
+		}
+		
+		// no args, show all commands
+		responder.systemNoticeToUserInPrivate(user, "Here's how it works...", "");
+		for (String s : helpForAllCommands(user)) {
+			responder.systemNoticeToUserInPrivate(user, s, "");
+		}
+		
 	}
 	
+	@CommandAlias(values = {"r"})
+	@HelpMessage(desc = "Toggle your ready status. Everyone must be ready to start a song", usage = "/ready")
 	void cmd_ready(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
@@ -148,6 +214,7 @@ public class CommandService {
 		multiplayer.toggleReady(user);
 	}
 	
+	@HelpMessage(desc = "Toggle force start for the room. Ready status is ignored", usage = "/force", requiresOper = true)
 	void cmd_force(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
@@ -155,6 +222,7 @@ public class CommandService {
 		multiplayer.toggleForce(user);
 	}
 	
+	@HelpMessage(desc = "Toggle free song selection. When on, anyone can pick a song", usage = "/free", requiresOper = true)
 	void cmd_free(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
@@ -162,6 +230,8 @@ public class CommandService {
 		multiplayer.toggleFreepick(user);
 	}
 	
+	@CommandAlias(values = {"fr"})
+	@HelpMessage(desc = "Toggle free rate selection. When on, anyone can pick any music rate", usage = "/freerate", requiresOper = true)
 	void cmd_freerate(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
