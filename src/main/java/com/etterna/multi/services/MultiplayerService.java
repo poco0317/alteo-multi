@@ -357,8 +357,8 @@ public class MultiplayerService {
 
 		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
 		Integer rate = response.getChart().getRate();
-		String ratestr = rate != null ? String.format("%.2f", rate / 1000.0) : "";
-		String chatmsg = String.format("%s selected %s (%s) - %sx%s",
+		String ratestr = rate != null ? String.format("%.2fx", rate / 1000.0) : "";
+		String chatmsg = String.format("%s selected %s (%s) - %s%s",
 				user.getUsername(),
 				chart.getTitle(),
 				chart.getDifficulty(),
