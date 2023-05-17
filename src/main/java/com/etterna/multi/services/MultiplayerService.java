@@ -2,6 +2,7 @@ package com.etterna.multi.services;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -52,8 +53,7 @@ public class MultiplayerService {
 	@Autowired
 	private EttpResponseMessageService responder;
 	
-	private ConcurrentHashMap<String, Object> logins = new ConcurrentHashMap<>();
-	private static final Object NOTHING = new Object();
+	private Set<String> logins = ConcurrentHashMap.newKeySet();
 	
 	@Scheduled(fixedDelay = SessionService.MILLIS_BETWEEN_STANDARD_HEARTBEAT)
 	private void keepaliveSessions() {
@@ -172,7 +172,7 @@ public class MultiplayerService {
 			return false;
 		}
 		
-		if (logins.containsKey(username)) {
+		if (logins.contains(username)) {
 			// user is already logged in
 			// kill previous session
 			killSessionByUsername(username);
@@ -182,7 +182,7 @@ public class MultiplayerService {
 		if (user != null) {
 			// login
 			user.setUsername(username);
-			logins.put(username, NOTHING);
+			logins.add(username);
 			sendUserListToUser(user);
 			broadcastConnectedUserLobbylistAddition(user);
 			sendRoomListToUser(user);
