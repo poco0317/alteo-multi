@@ -23,7 +23,6 @@ public class StartChartMessageHandler extends EttpMessageHandler {
 				String errors = user.getLobby().canStart(user);
 				if (errors == null || errors.isBlank()) {
 					multiplayer.startChart(user, msg);
-					multiplayer.broadcastLobbyUpdate(user.getLobby());
 				} else {
 					responder.systemNoticeToLobby(user.getLobby(), "Can't start ("+errors+")");
 				}

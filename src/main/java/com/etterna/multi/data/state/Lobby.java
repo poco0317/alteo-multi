@@ -5,35 +5,99 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import com.etterna.multi.services.EttpResponseMessageService;
+import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.PasswordUtil;
+import com.etterna.multi.services.SessionService;
 import com.etterna.multi.socket.ettpmessage.server.payload.ChartDTO;
+import com.etterna.multi.socket.ettpmessage.server.payload.DeleteRoomResponseMessage;
+import com.etterna.multi.socket.ettpmessage.server.payload.NewRoomResponseMessage;
+import com.etterna.multi.socket.ettpmessage.server.payload.PacklistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.SelectChartResponseMessage;
+import com.etterna.multi.socket.ettpmessage.server.payload.UpdateRoomResponseMessage;
+import com.etterna.multi.socket.ettpmessage.server.payload.UserlistResponseMessage;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Scope("prototype")
+@Getter @Setter
+@Slf4j
 public class Lobby {
-
+	
+	@Autowired
+	private MultiplayerService multiplayer;
+	
+	@Autowired
+	private SessionService sessionService;
+	
+	@Autowired
+	private EttpResponseMessageService messaging;
+	
 	private String name;
 	private String description;
 	private String password;
-	private String passwordsalt;
+	private String passwordSalt;
 	
 	private boolean freerate = false;
 	private boolean freepick = false;
 	private boolean playing = false;
 	private boolean forcestart = false;
-	private Chart chart;
 	private Set<String> commonpacks = new HashSet<>();
 	private SelectionMode selectionmode = SelectionMode.CHARTKEY;
 	private boolean countdown = false;
 	private boolean inCountdown = false;
 	private int timer;
-	private LobbyState state = LobbyState.SELECTING;
+	LobbyState state = LobbyState.SELECTING;
+	private Chart chart;
 	
 	private UserSession owner;
 	private Set<UserSession> operators = new HashSet<>();
 	private Set<UserSession> players = new HashSet<>();
-	
 	private Set<String> bannedUsers = new HashSet<>();
 	
+	/**
+	 * Final step of initial lobby creation
+	 */
+	public void broadcastCreation() {
+		NewRoomResponseMessage response = new NewRoomResponseMessage(this);
+		multiplayer.respondAllSessions("newroom", response);
+		
+		broadcastUserlistUpdate();
+	}
+	
+	public void broadcastDeletion() {
+		multiplayer.respondAllSessions("deleteroom", new DeleteRoomResponseMessage(this));
+	}
+	
+	/**
+	 * Mostly for updating room state globally
+	 */
+	public void broadcastUpdate() {
+		multiplayer.respondAllSessions("updateroom", new UpdateRoomResponseMessage(this));
+	}
+	
+	public void broadcastUserLeft(UserSession user) {
+		broadcastUserlistUpdate();
+		messaging.systemNoticeToLobby(this, user.getUsername() + " left.");
+	}
+	
+	public void broadcastUserlistUpdate() {
+		UserlistResponseMessage response = new UserlistResponseMessage(this);
+		messaging.respondToLobby(this, "userlist", response);
+	}
+	
+	public void broadcastPacklist() {
+		PacklistResponseMessage response = new PacklistResponseMessage(this);
+		messaging.respondToLobby(this, "packlist", response);
+	}
+		
 	public boolean canSelect(UserSession user) {
 		return freepick || isOwner(user) || isOperator(user); 
 	}
@@ -49,9 +113,6 @@ public class Lobby {
 			errors = errors.substring(0, errors.length()-2);
 			return errors;
 		}
-		
-		
-		
 		return errors;
 	}
 	
@@ -154,133 +215,14 @@ public class Lobby {
 		calcCommonPacks();
 	}
 	
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getDescription() {
-		return description;
-	}
-	public void setDescription(String description) {
-		this.description = description;
-	}
 	public void setPassword(String hashedPassword) {
 		String salt = PasswordUtil.getSalt();
-		this.passwordsalt = salt;
-		this.password = PasswordUtil.hashPassword(hashedPassword, passwordsalt);
+		this.passwordSalt = salt;
+		this.password = PasswordUtil.hashPassword(hashedPassword, passwordSalt);
 	}
 	public boolean checkPassword(String password) {
-		String hashed = PasswordUtil.hashPassword(password, passwordsalt);
+		String hashed = PasswordUtil.hashPassword(password, passwordSalt);
 		return hashed.equals(this.password);
 	}
-	public boolean isFreerate() {
-		return freerate;
-	}
-	public void setFreerate(boolean freerate) {
-		this.freerate = freerate;
-	}
-	public boolean isFreepick() {
-		return freepick;
-	}
-	public void setFreepick(boolean freepick) {
-		this.freepick = freepick;
-	}
-	public boolean isPlaying() {
-		return playing;
-	}
-	public void setPlaying(boolean playing) {
-		this.playing = playing;
-	}
-	public Chart getChart() {
-		return chart;
-	}
-	public void setChart(Chart chart) {
-		this.chart = chart;
-	}
-	public SelectionMode getSelectionmode() {
-		return selectionmode;
-	}
-	public void setSelectionmode(SelectionMode selectionmode) {
-		this.selectionmode = selectionmode;
-	}
-	public boolean isCountdown() {
-		return countdown;
-	}
-	public void setCountdown(boolean countdown) {
-		this.countdown = countdown;
-	}
-	public boolean isInCountdown() {
-		return inCountdown;
-	}
-	public void setInCountdown(boolean inCountdown) {
-		this.inCountdown = inCountdown;
-	}
-	public int getTimer() {
-		return timer;
-	}
-	public void setTimer(int timer) {
-		this.timer = timer;
-	}
-	public UserSession getOwner() {
-		return owner;
-	}
-	public void setOwner(UserSession owner) {
-		this.owner = owner;
-	}
-
-	public Set<String> getCommonpacks() {
-		return commonpacks;
-	}
-
-	public void setCommonpacks(Set<String> commonpacks) {
-		this.commonpacks = commonpacks;
-	}
-
-	public Set<UserSession> getOperators() {
-		return operators;
-	}
-
-	public void setOperators(Set<UserSession> operators) {
-		this.operators = operators;
-	}
-
-	public Set<UserSession> getPlayers() {
-		return players;
-	}
-
-	public void setPlayers(Set<UserSession> players) {
-		this.players = players;
-	}
-
-	public String getPasswordsalt() {
-		return passwordsalt;
-	}
-
-	public void setPasswordsalt(String passwordsalt) {
-		this.passwordsalt = passwordsalt;
-	}
-
-	public LobbyState getState() {
-		return state;
-	}
-
-	public void setState(LobbyState state) {
-		this.state = state;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public boolean isForcestart() {
-		return forcestart;
-	}
-
-	public void setForcestart(boolean forcestart) {
-		this.forcestart = forcestart;
-	}
-	
 	
 }

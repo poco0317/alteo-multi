@@ -1,6 +1,8 @@
 server:
   port: ${SOCKET_PORT}
 spring:
+  main:
+    allow-circular-references: true
   jpa:
     generate-ddl: true
     hibernate:

@@ -7,9 +7,8 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -22,13 +21,20 @@ import com.etterna.multi.data.state.UserSession;
 import com.etterna.multi.socket.ettpmessage.client.payload.CreateRoomMessage;
 import com.etterna.multi.socket.ettpmessage.client.payload.EnterRoomMessage;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class LobbyService {
-	
-	private static final Logger m_logger = LoggerFactory.getLogger(LobbyService.class);
 	
 	@Autowired
 	private SessionService sessionService;
+	
+	@Autowired
+	private MultiplayerService multiplayer;
+	
+	@Autowired
+	private ApplicationContext ctx;
 
 	// room names to lobbies
 	private ConcurrentHashMap<String, Lobby> rooms = new ConcurrentHashMap<>();
@@ -97,7 +103,7 @@ public class LobbyService {
 			return false;
 		}
 		
-		lobby = new Lobby();
+		lobby = ctx.getBean(Lobby.class);
 		lobby.setOwner(user);
 		lobby.getPlayers().add(user);
 		lobby.setSelectionmode(SelectionMode.CHARTKEY);
@@ -113,6 +119,7 @@ public class LobbyService {
 		user.setReady(false);
 		
 		rooms.put(name.toLowerCase(), lobby);
+		lobby.broadcastCreation();
 		
 		m_logger.info("Created lobby '{}' - desc '{}' - PASSWORDED: {}", lobby.getName(), lobby.getDescription(), lobby.getPassword() != null);
 		return true;
@@ -145,6 +152,12 @@ public class LobbyService {
 		}
 		
 		m_logger.info("Player {} left lobby {} - {} users left", user.getUsername(), lobby.getName(), lobby.getPlayers().size());
+		
+		if (lobby.getPlayers().isEmpty()) {
+			lobby.broadcastDeletion();
+		} else {
+			lobby.broadcastUserLeft(user);
+		}
 	}
 	
 	/*
@@ -164,6 +177,9 @@ public class LobbyService {
 			lobby.setPlaying(false);
 			lobby.setChart(null);
 		}
+		
+		lobby.broadcastUserlistUpdate();
+		lobby.broadcastUpdate();
 	}
 	
 	public void startChart(Lobby lobby, Chart chart) {

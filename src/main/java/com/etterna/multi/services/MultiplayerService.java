@@ -22,19 +22,13 @@ import com.etterna.multi.socket.ettpmessage.client.payload.HelloMessage;
 import com.etterna.multi.socket.ettpmessage.client.payload.SelectChartMessage;
 import com.etterna.multi.socket.ettpmessage.client.payload.StartChartMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.ChartDTO;
-import com.etterna.multi.socket.ettpmessage.server.payload.DeleteRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.EnterRoomResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.LeaderboardResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.LobbyUserlistResponseMessage;
-import com.etterna.multi.socket.ettpmessage.server.payload.LobbyUserlistUpdateResponseMessage;
-import com.etterna.multi.socket.ettpmessage.server.payload.NewRoomResponseMessage;
-import com.etterna.multi.socket.ettpmessage.server.payload.PacklistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.RoomDTO;
 import com.etterna.multi.socket.ettpmessage.server.payload.RoomlistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.SelectChartResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.StartChartResponseMessage;
-import com.etterna.multi.socket.ettpmessage.server.payload.UpdateRoomResponseMessage;
-import com.etterna.multi.socket.ettpmessage.server.payload.UserlistResponseMessage;
 
 @Service
 public class MultiplayerService {
@@ -73,7 +67,7 @@ public class MultiplayerService {
 			}
 		});
 
-		m_logger.debug("Finished pinging sessions - {} remaining", sessionService.getSessionCount());
+		m_logger.debug("Finished pinging sessions - {} still alive", sessionService.getSessionCount());
 	}
 	
 	/**
@@ -100,12 +94,7 @@ public class MultiplayerService {
 		if (sessionService.kill(session)) {
 			if (user.getUsername() != null) {
 				logins.remove(user.getUsername());
-				broadcastConnectedUserLobbylistRemoval(user);
-				
-				Lobby lobby = lobbyService.getLobbyByUserSession(user);
-				if (lobby != null) {
-					lobbyService.removeFromLobby(user, lobby);
-				}
+				user.goOffline();
 				
 				m_logger.info("Killed multiplayer session - {} - {}", session.getId(), user.getUsername());
 			}
@@ -116,12 +105,7 @@ public class MultiplayerService {
 		do {
 			UserSession user = sessionService.getByUsername(username);
 			if (user != null && user.getUsername() != null && user.getUsername().equalsIgnoreCase(username)) {
-				broadcastConnectedUserLobbylistRemoval(user);
-				
-				Lobby lobby = lobbyService.getLobbyByUserSession(user);
-				if (lobby != null) {
-					lobbyService.removeFromLobby(user, lobby);
-				}
+				user.goOffline();
 				
 				m_logger.info("Killed ws session by user - {}", username);
 			}
@@ -182,9 +166,9 @@ public class MultiplayerService {
 		if (user != null) {
 			// login
 			user.setUsername(username);
+			user.goOnline();
 			logins.add(username);
 			sendUserListToUser(user);
-			broadcastConnectedUserLobbylistAddition(user);
 			sendRoomListToUser(user);
 		} else {
 			// user is not connected?
@@ -194,53 +178,21 @@ public class MultiplayerService {
 	}
 	
 	public boolean createLobby(WebSocketSession session, EnterRoomMessage msg) {
-		if (lobbyService.createLobby(session, msg)) {
-			Lobby lobby = lobbyService.getLobbyBySocketSession(session);
-			broadcastRoomCreation(lobby);
-			sendUserListToLobby(lobby);
-			return true;
-		}
-		return false;
+		return lobbyService.createLobby(session, msg);
 	}
 	
 	public boolean createLobby(WebSocketSession session, CreateRoomMessage msg) {
-		if (lobbyService.createLobby(session, msg)) {
-			Lobby lobby = lobbyService.getLobbyBySocketSession(session);
-			broadcastRoomCreation(lobby);
-			sendUserListToLobby(lobby);
-			return true;
-		}
-		return false;
+		return lobbyService.createLobby(session, msg);
 	}
 	
 	public void updateLobbyState(Lobby lobby) {
 		if (lobby == null) return;
-		
 		lobbyService.updateLobbyState(lobby);
-		sendUserListToLobby(lobby);
-		broadcastLobbyUpdate(lobby);
 	}
 	
 	public void enterLobby(UserSession user, Lobby lobby) {
-		lobbyService.enterLobby(user, lobby);
-		
-		// put the user in the room
-		responder.respond(user.getSession(), "enterroom", new EnterRoomResponseMessage(true));
-		
-		// tell everyone there that they joined
-		responder.systemNoticeToLobby(lobby, user.getUsername()+" joined.");
-		
-		// tell everyone else what state the lobby is in and who is in there
-		respondAllSessions("updateroom", new UpdateRoomResponseMessage(lobby));
-		sendUserListToLobby(lobby);
-		
-		// update the pack list for the lobby users
-		sendPackListToLobby(lobby);
-		
-		// if there was a chart selected, put the user on it
-		if (lobby.getChart() != null) {
-			responder.respond(user.getSession(), "selectchart", null);
-		}
+		if (user == null || lobby == null) return;
+		user.enterLobby(lobby);
 	}
 	
 	public boolean lobbyExists(String name) {
@@ -279,39 +231,8 @@ public class MultiplayerService {
 		Lobby lobby = lobbyService.getLobbyByUserSession(user);
 		if (lobby != null) {
 			lobbyService.removeFromLobby(user, lobby);
-			
-			if (lobby.getPlayers().isEmpty()) {
-				respondAllSessions("deleteroom", new DeleteRoomResponseMessage(lobby));
-			} else {
-				sendUserListToLobby(lobby);
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " left.");
-			}
 			responder.systemNoticeToUserInGlobalChat(user, "Left room '"+lobby.getName()+"'");
 		}
-		
-	}
-	
-	public void broadcastLobbyUpdate(Lobby lobby) {
-		if (lobby != null) {
-			respondAllSessions("updateroom", new UpdateRoomResponseMessage(lobby));
-		}
-	}
-	
-	public void broadcastConnectedUserLobbylistRemoval(UserSession leaver) {
-		LobbyUserlistUpdateResponseMessage response = new LobbyUserlistUpdateResponseMessage();
-		response.addOff(leaver.getUsername());
-		respondAllSessions("lobbyuserlistupdate", response);
-	}
-	
-	public void broadcastConnectedUserLobbylistAddition(UserSession joiner) {
-		LobbyUserlistUpdateResponseMessage response = new LobbyUserlistUpdateResponseMessage();
-		response.addOn(joiner.getUsername());
-		respondAllSessions("lobbyuserlistupdate", response);
-	}
-	
-	public void broadcastRoomCreation(Lobby lobby) {
-		NewRoomResponseMessage response = new NewRoomResponseMessage(lobby);
-		respondAllSessions("newroom", response);
 	}
 	
 	public void broadcastRoomList() {
@@ -329,19 +250,9 @@ public class MultiplayerService {
 		responder.respond(user.getSession(), "roomlist", new RoomlistResponseMessage(roomdtos));
 	}
 	
-	/**
-	 * For rooms/lobbies only
-	 */
-	public void sendUserListToLobby(Lobby lobby) {
-		if (lobby == null) return;
-		UserlistResponseMessage response = new UserlistResponseMessage(lobby);
-		responder.respondToLobby(lobby, "userlist", response);
-	}
-	
 	public void sendPackListToLobby(Lobby lobby) {
 		if (lobby == null) return;
-		PacklistResponseMessage response = new PacklistResponseMessage(lobby);
-		responder.respondToLobby(lobby, "packlist", response);
+		
 	}
 	
 	public void selectChart(UserSession user, StartChartMessage msg) {
@@ -382,6 +293,7 @@ public class MultiplayerService {
 		} else {
 			startChartInternal(user, msg);
 		}
+		lobby.broadcastUpdate();
 	}
 	
 	private void startChartInternal(UserSession user, StartChartMessage msg) {
@@ -426,61 +338,22 @@ public class MultiplayerService {
 	
 	public void toggleReady(UserSession user) {
 		if (user == null || user.getLobby() == null) return;
-		Lobby lobby = user.getLobby();
-		if (user.isReady()) {
-			user.setReady(false);
-			sendUserListToLobby(lobby);
-			responder.systemNoticeToLobby(lobby, user.getUsername() + " is not ready.");
-		} else {
-			user.setReady(true);
-			sendUserListToLobby(lobby);
-			responder.systemNoticeToLobby(lobby, user.getUsername() + " is ready.");
-		}
+		user.toggleReady();
 	}
 	
 	public void toggleForce(UserSession user) {
 		if (user == null || user.getLobby() == null) return;
-		Lobby lobby = user.getLobby();
-		if (lobby.isOperOrOwner(user)) {
-			lobby.setForcestart(!lobby.isForcestart());
-			if (lobby.isForcestart()) {
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " enabled force start for this song.");
-			} else {
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " disabled force start.");
-			}
-		} else {
-			responder.systemNoticeToUserInPrivate(user, "You can't set force start.", user.getLobby().getName());
-		}
+		user.toggleForceStart();
 	}
 	
 	public void toggleFreepick(UserSession user) {
 		if (user == null || user.getLobby() == null) return;
-		Lobby lobby = user.getLobby();
-		if (lobby.isOperOrOwner(user)) {
-			lobby.setFreepick(!lobby.isFreepick());
-			if (lobby.isFreepick()) {
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " enabled freepick. Anyone can pick a song.");
-			} else {
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " disabled freepick. Only Operators and the Owner can pick a song.");
-			}
-		} else {
-			responder.systemNoticeToUserInPrivate(user, "You can't set free song selection.", user.getLobby().getName());
-		}
+		user.toggleFreepick();
 	}
 	
 	public void toggleFreerate(UserSession user) {
 		if (user == null || user.getLobby() == null) return;
-		Lobby lobby = user.getLobby();
-		if (lobby.isOperOrOwner(user)) {
-			lobby.setFreerate(!lobby.isFreerate());
-			if (lobby.isFreerate()) {
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " enabled freerate. You may pick any rate to play.");
-			} else {
-				responder.systemNoticeToLobby(lobby, user.getUsername() + " disabled freerate. The song selector picks the rate.");
-			}
-		} else {
-			responder.systemNoticeToUserInPrivate(user, "You can't set free rate selection.", user.getLobby().getName());
-		}
+		user.toggleFreerate();
 	}
 	
 	public void updateLobbyGameplay(Lobby lobby) {

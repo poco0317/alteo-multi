@@ -8,18 +8,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.UserSession;
 
-@Service
-public class SessionService {
+import lombok.extern.slf4j.Slf4j;
 
-	private static final Logger m_logger = LoggerFactory.getLogger(SessionService.class);
+@Service
+@Slf4j
+public class SessionService {
+	
+	@Autowired
+	private ApplicationContext ctx;
 	
 	public static final long MAX_MILLIS_BETWEEN_HEARTBEATS = 30L * 1000L; // 30sec
 	public static final long MILLIS_BETWEEN_STANDARD_HEARTBEAT = 10L * 1000L; // 10sec
@@ -82,7 +86,7 @@ public class SessionService {
 	}
 
 	public void register(WebSocketSession session) {
-		UserSession user = new UserSession();
+		UserSession user = ctx.getBean(UserSession.class);
 		user.setSession(session);
 		sessions.put(session.getId(), user);
 	}
