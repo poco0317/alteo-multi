@@ -10,6 +10,9 @@ import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.client.payload.CreateRoomMessage;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Component
 public class CreateRoomMessageHandler extends EttpMessageHandler {
 	
@@ -38,18 +41,13 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 		}
 	}
 	
+	@Getter @Setter
 	public class CreateRoomResponseMessage {
 		private boolean created;
 		public CreateRoomResponseMessage(boolean c) {
 			created = c;
 		}
 		public CreateRoomResponseMessage() {}
-		public boolean getCreated() {
-			return created;
-		}
-		public void setCreated(boolean c) {
-			created = c;
-		}
 	}
 
 }

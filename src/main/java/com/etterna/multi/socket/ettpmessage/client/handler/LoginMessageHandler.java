@@ -9,6 +9,9 @@ import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.client.payload.LoginMessage;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Component
 public class LoginMessageHandler extends EttpMessageHandler {
 	
@@ -29,21 +32,10 @@ public class LoginMessageHandler extends EttpMessageHandler {
 		responder.respond(session, "login", response);
 	}
 	
+	@Getter @Setter
 	public class LoginResponseMessage {
 		private boolean logged;
 		private String msg = "";
-		public boolean isLogged() {
-			return logged;
-		}
-		public void setLogged(boolean logged) {
-			this.logged = logged;
-		}
-		public String getMsg() {
-			return msg;
-		}
-		public void setMsg(String msg) {
-			this.msg = msg;
-		}
 	}
 
 }

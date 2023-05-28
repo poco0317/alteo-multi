@@ -2,6 +2,10 @@ package com.etterna.multi.socket.ettpmessage.server.payload;
 
 import com.etterna.multi.data.state.Chart;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class SelectChartResponseMessage {
 	
 	private ChartDTO chart;
@@ -23,14 +27,6 @@ public class SelectChartResponseMessage {
 		this.chart.setRate(chart.getRate());
 		this.chart.setSubtitle(chart.getSubtitle());
 		this.chart.setTitle(chart.getTitle());
-	}
-	
-	
-	public ChartDTO getChart() {
-		return chart;
-	}
-	public void setChart(ChartDTO chart) {
-		this.chart = chart;
 	}
 
 }

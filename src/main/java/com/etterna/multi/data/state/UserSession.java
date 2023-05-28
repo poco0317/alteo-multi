@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.services.EttpResponseMessageService;
+import com.etterna.multi.services.LobbyAuditingDispatch;
 import com.etterna.multi.services.LobbyService;
 import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.socket.ettpmessage.server.payload.EnterRoomResponseMessage;
@@ -32,6 +33,9 @@ public class UserSession {
 	
 	@Autowired
 	private EttpResponseMessageService messaging;
+	
+	@Autowired
+	private LobbyAuditingDispatch auditDispatch;
 	
 	private String username;
 	private WebSocketSession session;

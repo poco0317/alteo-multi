@@ -2,8 +2,7 @@ package com.etterna.multi.services;
 
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -16,11 +15,15 @@ import com.etterna.multi.socket.ettpmessage.client.payload.ChatMessage;
 import com.etterna.util.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class EttpResponseMessageService {
 	
-	private static final Logger m_logger = LoggerFactory.getLogger(EttpResponseMessageService.class);
-
+	@Autowired
+	private LobbyAuditingDispatch auditDispatch;
+	
 	private static final String CHAT_RESPONSE_TYPE = "chat";
 	
 	private static final ObjectMapper mapper = Util.objectMapper();
@@ -134,6 +137,7 @@ public class EttpResponseMessageService {
 	public void systemNoticeToLobby(Lobby lobby, String message) {
 		if (lobby == null) return;
 		respondToLobby(lobby, CHAT_RESPONSE_TYPE, makeChatMessage(lobby.getName(), ChatMessageType.ROOM, ColorUtil.system(message)));
+		auditDispatch.roomMessage(lobby, "SYSTEM", message);
 	}
 	
 	/**

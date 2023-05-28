@@ -18,7 +18,7 @@ public class UserLoginService {
 	@Autowired
 	private UserLoginRepository repo;
 	
-	private UserLogin get(String username) {
+	public UserLogin get(String username) {
 		return repo.findById(username.toLowerCase()).orElse(null);
 	}
 	

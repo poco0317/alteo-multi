@@ -190,11 +190,6 @@ public class MultiplayerService {
 		lobbyService.updateLobbyState(lobby);
 	}
 	
-	public void enterLobby(UserSession user, Lobby lobby) {
-		if (user == null || lobby == null) return;
-		user.enterLobby(lobby);
-	}
-	
 	public boolean lobbyExists(String name) {
 		return lobbyService.getLobbyByName(name) != null;
 	}
@@ -209,12 +204,12 @@ public class MultiplayerService {
 			
 			if (lobby.getPassword() == null || lobby.getPassword().isBlank()) {
 				// no password, come on in
-				enterLobby(user, lobby);
+				user.enterLobby(lobby);
 				return true;
 			} else {
 				if (lobby.checkPassword(password)) {
 					// success password
-					enterLobby(user, lobby);
+					user.enterLobby(lobby);
 					return true;
 				} else {
 					// failed password
@@ -235,11 +230,6 @@ public class MultiplayerService {
 		}
 	}
 	
-	public void broadcastRoomList() {
-		List<RoomDTO> roomdtos = lobbyService.getAllLobbies(true).stream().map(p -> new RoomDTO(p)).collect(Collectors.toList());
-		respondAllSessions("roomlist", new RoomlistResponseMessage(roomdtos));
-	}
-	
 	public void sendUserListToUser(UserSession recipient) {
 		LobbyUserlistResponseMessage response = new LobbyUserlistResponseMessage(sessionService.getLoggedInSessions());
 		responder.respond(recipient.getSession(), "lobbyuserlist", response);
@@ -248,11 +238,6 @@ public class MultiplayerService {
 	public void sendRoomListToUser(UserSession user) {
 		List<RoomDTO> roomdtos = lobbyService.getAllLobbies(true).stream().map(p -> new RoomDTO(p)).collect(Collectors.toList());
 		responder.respond(user.getSession(), "roomlist", new RoomlistResponseMessage(roomdtos));
-	}
-	
-	public void sendPackListToLobby(Lobby lobby) {
-		if (lobby == null) return;
-		
 	}
 	
 	public void selectChart(UserSession user, StartChartMessage msg) {

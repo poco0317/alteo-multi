@@ -5,6 +5,10 @@ import java.util.stream.Collectors;
 
 import com.etterna.multi.data.state.Lobby;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class RoomDTO {
 	
 	private String name;
@@ -20,36 +24,6 @@ public class RoomDTO {
 		state = lobby.getState().num();
 		pass = lobby.getPassword() != null && !lobby.getPassword().isEmpty();
 		players = lobby.getPlayers().stream().map(p -> p.getUsername()).collect(Collectors.toList());
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getDesc() {
-		return desc;
-	}
-	public void setDesc(String desc) {
-		this.desc = desc;
-	}
-	public List<String> getPlayers() {
-		return players;
-	}
-	public void setPlayers(List<String> players) {
-		this.players = players;
-	}
-	public int getState() {
-		return state;
-	}
-	public void setState(int state) {
-		this.state = state;
-	}
-	public boolean isPass() {
-		return pass;
-	}
-	public void setPass(boolean pass) {
-		this.pass = pass;
 	}
 
 }

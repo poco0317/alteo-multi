@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.etterna.multi.data.state.Lobby;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class PacklistResponseMessage {
 	
 	private List<String> commonpacks;
@@ -12,14 +16,6 @@ public class PacklistResponseMessage {
 	public PacklistResponseMessage() {}
 	public PacklistResponseMessage(Lobby lobby) {
 		commonpacks = new ArrayList<>(lobby.getCommonpacks());
-	}
-
-	public List<String> getCommonpacks() {
-		return commonpacks;
-	}
-
-	public void setCommonpacks(List<String> commonpacks) {
-		this.commonpacks = commonpacks;
 	}
 
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.etterna.multi.data.GameLobby;
 import com.etterna.multi.services.EttpResponseMessageService;
 import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.PasswordUtil;
@@ -28,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Scope("prototype")
 @Getter @Setter
-@Slf4j
 public class Lobby {
 	
 	@Autowired
@@ -61,6 +61,8 @@ public class Lobby {
 	private Set<UserSession> operators = new HashSet<>();
 	private Set<UserSession> players = new HashSet<>();
 	private Set<String> bannedUsers = new HashSet<>();
+	
+	private GameLobby dbGameLobby;
 	
 	/**
 	 * Final step of initial lobby creation

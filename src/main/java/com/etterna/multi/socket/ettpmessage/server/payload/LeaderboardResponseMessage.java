@@ -6,6 +6,10 @@ import java.util.List;
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class LeaderboardResponseMessage {
 	
 	private List<GameplayDTO> scores = new ArrayList<>();
@@ -20,36 +24,12 @@ public class LeaderboardResponseMessage {
 			scores.add(gg);
 		}
 	}
-	
-	public List<GameplayDTO> getScores() {
-		return scores;
-	}
-	public void setScores(List<GameplayDTO> scores) {
-		this.scores = scores;
-	}
 
+	@Getter @Setter
 	public class GameplayDTO {
 		private Double wife;
 		private String user;
 		private String jdgstr;
-		public Double getWife() {
-			return wife;
-		}
-		public void setWife(Double wife) {
-			this.wife = wife;
-		}
-		public String getUser() {
-			return user;
-		}
-		public void setUser(String user) {
-			this.user = user;
-		}
-		public String getJdgstr() {
-			return jdgstr;
-		}
-		public void setJdgstr(String jdgstr) {
-			this.jdgstr = jdgstr;
-		}
 	}
 
 }

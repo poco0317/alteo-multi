@@ -2,6 +2,10 @@ package com.etterna.multi.socket.ettpmessage.server.payload;
 
 import java.util.Objects;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class ChartDTO {
 	private String chartkey;
 	private String title;
@@ -11,54 +15,7 @@ public class ChartDTO {
 	private Double meter;
 	private String filehash;
 	private Integer rate;
-	public String getChartkey() {
-		return chartkey;
-	}
-	public void setChartkey(String chartkey) {
-		this.chartkey = chartkey;
-	}
-	public String getTitle() {
-		return title;
-	}
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	public String getSubtitle() {
-		return subtitle;
-	}
-	public void setSubtitle(String subtitle) {
-		this.subtitle = subtitle;
-	}
-	public String getArtist() {
-		return artist;
-	}
-	public void setArtist(String artist) {
-		this.artist = artist;
-	}
-	public String getFilehash() {
-		return filehash;
-	}
-	public void setFilehash(String filehash) {
-		this.filehash = filehash;
-	}
-	public String getDifficulty() {
-		return difficulty;
-	}
-	public void setDifficulty(String difficulty) {
-		this.difficulty = difficulty;
-	}
-	public Double getMeter() {
-		return meter;
-	}
-	public void setMeter(Double meter) {
-		this.meter = meter;
-	}
-	public Integer getRate() {
-		return rate;
-	}
-	public void setRate(Integer rate) {
-		this.rate = rate;
-	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(artist, chartkey, difficulty, filehash, meter, rate, subtitle, title);

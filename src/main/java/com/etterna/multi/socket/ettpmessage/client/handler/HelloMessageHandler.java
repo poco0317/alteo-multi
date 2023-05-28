@@ -9,6 +9,9 @@ import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.client.payload.HelloMessage;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Component
 public class HelloMessageHandler extends EttpMessageHandler {
 	
@@ -29,15 +32,10 @@ public class HelloMessageHandler extends EttpMessageHandler {
 		responder.respond(session, "hello", new HelloResponseMessage());
 	}
 	
+	@Getter @Setter
 	public class HelloResponseMessage {
 		private int version = SERVER_VERSION;
 		private String name = SERVER_NAME;
-		public int getVersion() {
-			return version;
-		}
-		public String getName() {
-			return name;
-		}
 	}
 
 }

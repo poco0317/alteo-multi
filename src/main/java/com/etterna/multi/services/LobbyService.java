@@ -31,10 +31,10 @@ public class LobbyService {
 	private SessionService sessionService;
 	
 	@Autowired
-	private MultiplayerService multiplayer;
+	private ApplicationContext ctx;
 	
 	@Autowired
-	private ApplicationContext ctx;
+	private LobbyAuditingDispatch auditDispatch;
 
 	// room names to lobbies
 	private ConcurrentHashMap<String, Lobby> rooms = new ConcurrentHashMap<>();
@@ -120,6 +120,7 @@ public class LobbyService {
 		
 		rooms.put(name.toLowerCase(), lobby);
 		lobby.broadcastCreation();
+		auditDispatch.roomCreation(user);
 		
 		m_logger.info("Created lobby '{}' - desc '{}' - PASSWORDED: {}", lobby.getName(), lobby.getDescription(), lobby.getPassword() != null);
 		return true;
@@ -128,6 +129,7 @@ public class LobbyService {
 	public void enterLobby(UserSession user, Lobby lobby) {
 		lobby.enter(user);
 		user.setState(PlayerState.READY);
+		auditDispatch.roomParticipant(user);
 		
 		m_logger.info("Player {} entered lobby {}", user.getUsername(), lobby.getName());
 	}

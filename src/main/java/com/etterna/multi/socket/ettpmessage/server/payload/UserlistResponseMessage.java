@@ -6,6 +6,10 @@ import java.util.List;
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class UserlistResponseMessage {
 	
 	private List<Player> players;
@@ -22,35 +26,11 @@ public class UserlistResponseMessage {
 		}
 	}
 
-	public List<Player> getPlayers() {
-		return players;
-	}
 
-	public void setPlayers(List<Player> players) {
-		this.players = players;
-	}
-
+	@Getter @Setter
 	public class Player {
 		private String name;
 		private int status;
 		private boolean ready;
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public int getStatus() {
-			return status;
-		}
-		public void setStatus(int status) {
-			this.status = status;
-		}
-		public boolean isReady() {
-			return ready;
-		}
-		public void setReady(boolean ready) {
-			this.ready = ready;
-		}
 	}
 }

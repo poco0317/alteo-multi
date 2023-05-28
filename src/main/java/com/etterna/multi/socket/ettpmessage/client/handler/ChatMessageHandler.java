@@ -2,11 +2,13 @@ package com.etterna.multi.socket.ettpmessage.client.handler;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
+import com.etterna.multi.services.LobbyAuditingDispatch;
 import com.etterna.multi.socket.ettpmessage.ChatMessageType;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
@@ -14,6 +16,9 @@ import com.etterna.multi.socket.ettpmessage.client.payload.ChatMessage;
 
 @Component
 public class ChatMessageHandler extends EttpMessageHandler {
+	
+	@Autowired
+	private LobbyAuditingDispatch auditDispatch;
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
@@ -64,6 +69,7 @@ public class ChatMessageHandler extends EttpMessageHandler {
 					return;
 				}
 				responder.userChatToLobby(user, msg.getMsg());
+				auditDispatch.roomMessage(user.getLobby(), user.getUsername(), msg.getMsg());
 				break;
 			}
 			case PRIVATE: {
