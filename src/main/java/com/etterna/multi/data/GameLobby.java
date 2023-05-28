@@ -20,7 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "game_lobbies")
+@Table(name = "multi_game_lobbies")
 @Getter @Setter
 public class GameLobby {
 	

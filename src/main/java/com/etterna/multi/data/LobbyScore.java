@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "lobby_scores")
+@Table(name = "multi_lobby_scores")
 @Getter @Setter
 public class LobbyScore {
 	
