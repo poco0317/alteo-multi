@@ -21,6 +21,11 @@
 	
 	<dependencies>
 		<dependency>
+			<groupId>com.etterna</groupId>
+			<artifactId>common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
             <groupId>ca.pjer</groupId>
             <artifactId>logback-awslogs-appender</artifactId>
             <version>1.6.0</version>
