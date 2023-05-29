@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.etterna.multi.data.GameLobby;
@@ -38,6 +40,14 @@ public class LobbyAuditingDispatch {
 	@Autowired
 	private UserLoginService logins;
 	
+	@EventListener
+	@Transactional
+	public void handleApplicationReadyEvent(ApplicationReadyEvent evt) {
+		m_logger.info("Server started - resetting all lobbies to closed state");
+		
+		lobbies.closeAllLobbies();
+	}
+	
 	@Transactional
 	public void roomCreation(UserSession user) {
 		m_logger.trace("Recording user room creation");
@@ -49,10 +59,20 @@ public class LobbyAuditingDispatch {
 		newLobby.setDescription(l.getDescription());
 		newLobby.setName(l.getName());
 		newLobby.setPassworded(l.getPassword() != null && !l.getPassword().isBlank());
+		newLobby.setActive(true);
 		Set<UserLogin> users = new HashSet<>();
 		users.add(login);
 		newLobby.setUsers(users);
 		l.setDbGameLobby(newLobby);
+		newLobby = lobbies.save(newLobby);
+	}
+	
+	@Transactional
+	public void roomDeletion(Lobby lobby) {
+		m_logger.trace("Recording user room ending");
+		
+		GameLobby newLobby = lobby.getDbGameLobby();
+		newLobby.setActive(false);
 		newLobby = lobbies.save(newLobby);
 	}
 	
@@ -83,6 +103,7 @@ public class LobbyAuditingDispatch {
 		
 		LobbyScore score = LobbyScore.fromScoreMessage(scoreMsg);
 		score.setLobby(user.getLobby().getDbGameLobby());
+		score.setUser(logins.get(user.getUsername()));
 		score = scores.save(score);
 	}
 

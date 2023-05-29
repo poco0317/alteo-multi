@@ -2,6 +2,8 @@ package com.etterna.multi.socket.ettpmessage.client.payload;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,23 +35,40 @@ public class ScoreMessage {
 	private Integer perfect;
 	private Integer marv;
 	
+	@JsonProperty("Notes")
 	private Integer Notes;
+	@JsonProperty("TapsAndHolds")
 	private Integer TapsAndHolds;
+	@JsonProperty("Jumps")
 	private Integer Jumps;
+	@JsonProperty("Holds")
 	private Integer Holds;
+	@JsonProperty("Mines")
 	private Integer Mines;
+	@JsonProperty("Hands")
 	private Integer Hands;
+	@JsonProperty("Rolls")
 	private Integer Rolls;
+	@JsonProperty("Lifts")
 	private Integer Lifts;
+	@JsonProperty("Fakes")
 	private Integer Fakes;
 	
+	@JsonProperty("Overall")
 	private Double Overall;
+	@JsonProperty("Stream")
 	private Double Stream;
+	@JsonProperty("Jumpstream")
 	private Double Jumpstream;
+	@JsonProperty("Handstream")
 	private Double Handstream;
+	@JsonProperty("Stamina")
 	private Double Stamina;
+	@JsonProperty("JackSpeed")
 	private Double JackSpeed;
+	@JsonProperty("Chordjack")
 	private Double Chordjack;
+	@JsonProperty("Technical")
 	private Double Technical;
 	
 	private Integer hitmine;

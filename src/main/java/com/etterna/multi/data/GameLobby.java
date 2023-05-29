@@ -1,5 +1,6 @@
 package com.etterna.multi.data;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -37,6 +38,12 @@ public class GameLobby {
 	
 	@Column(name = "passworded", nullable = false)
 	private Boolean passworded;
+	
+	@Column(name = "active")
+	private Boolean active = false;
+	
+	@Column(name = "created")
+	private Date created = new Date();
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creator", nullable = false)

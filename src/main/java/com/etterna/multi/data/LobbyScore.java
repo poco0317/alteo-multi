@@ -29,6 +29,10 @@ public class LobbyScore {
 	@JoinColumn(name = "lobby")
 	private GameLobby lobby;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user")
+	private UserLogin user;
+	
 	@Column(name = "score_key")
 	private String scoreKey;
 	@Column(name = "chart_key")
@@ -95,6 +99,23 @@ public class LobbyScore {
 	@Column(name = "wife_grade")
 	private String wifeGrade;
 	
+	@Column(name = "ss1") // overall
+	private Double ss1;
+	@Column(name = "ss2") // stream
+	private Double ss2;
+	@Column(name = "ss3") // jumpstream
+	private Double ss3;
+	@Column(name = "ss4") // handstream
+	private Double ss4;
+	@Column(name = "ss5") // stamina
+	private Double ss5;
+	@Column(name = "ss6") // jacks
+	private Double ss6;
+	@Column(name = "ss7") // cj
+	private Double ss7;
+	@Column(name = "ss8") // tech
+	private Double ss8;
+	
 	public static LobbyScore fromScoreMessage(ScoreMessage msg) {
 		LobbyScore score = new LobbyScore();
 		
@@ -128,6 +149,14 @@ public class LobbyScore {
 		score.setJudgeScale(0.0);
 		score.setGrade(null);
 		score.setWifeGrade(null);
+		score.setSs1(msg.getOverall());
+		score.setSs2(msg.getStream());
+		score.setSs3(msg.getJumpstream());
+		score.setSs4(msg.getHandstream());
+		score.setSs5(msg.getStamina());
+		score.setSs6(msg.getJackSpeed());
+		score.setSs7(msg.getChordjack());
+		score.setSs8(msg.getTechnical());
 		
 		return score;
 	}

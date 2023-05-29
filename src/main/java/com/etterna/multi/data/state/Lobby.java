@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.etterna.multi.data.GameLobby;
 import com.etterna.multi.services.EttpResponseMessageService;
+import com.etterna.multi.services.LobbyAuditingDispatch;
 import com.etterna.multi.services.MultiplayerService;
 import com.etterna.multi.services.PasswordUtil;
 import com.etterna.multi.services.SessionService;
@@ -24,7 +25,6 @@ import com.etterna.multi.socket.ettpmessage.server.payload.UserlistResponseMessa
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Scope("prototype")
@@ -39,6 +39,9 @@ public class Lobby {
 	
 	@Autowired
 	private EttpResponseMessageService messaging;
+	
+	@Autowired
+	private LobbyAuditingDispatch auditDispatch;
 	
 	private String name;
 	private String description;
@@ -76,6 +79,7 @@ public class Lobby {
 	
 	public void broadcastDeletion() {
 		multiplayer.respondAllSessions("deleteroom", new DeleteRoomResponseMessage(this));
+		auditDispatch.roomDeletion(this);
 	}
 	
 	/**

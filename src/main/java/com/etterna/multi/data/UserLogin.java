@@ -38,5 +38,8 @@ public class UserLogin {
 	
 	@ManyToMany(mappedBy = "users", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 	private Set<GameLobby> lobbiesParticipatedIn;
+	
+	@OneToMany(mappedBy = "user")
+	private Set<LobbyScore> scores;
 
 }
