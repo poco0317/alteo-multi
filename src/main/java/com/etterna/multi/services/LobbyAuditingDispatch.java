@@ -46,6 +46,7 @@ public class LobbyAuditingDispatch {
 		m_logger.info("Server started - resetting all lobbies to closed state");
 		
 		lobbies.closeAllLobbies();
+		m_logger.info("Finished resetting lobbies to closed state");
 	}
 	
 	@Transactional
@@ -101,7 +102,7 @@ public class LobbyAuditingDispatch {
 	public void roomScore(UserSession user, ScoreMessage scoreMsg) {
 		m_logger.trace("Recording room score");
 		
-		LobbyScore score = LobbyScore.fromScoreMessage(scoreMsg);
+		LobbyScore score = scoreMsg.toLobbyScore();
 		score.setLobby(user.getLobby().getDbGameLobby());
 		score.setUser(logins.get(user.getUsername()));
 		score = scores.save(score);
