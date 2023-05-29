@@ -2,6 +2,7 @@ package com.etterna.multi.socket.ettpmessage.client.payload;
 
 import java.util.List;
 
+import com.etterna.multi.data.LobbyScore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
@@ -84,6 +85,72 @@ public class ScoreMessage {
 		private List<Double> offsets;
 		private List<Integer> tracks;
 		private List<Integer> notetypes;
+	}
+	
+	public LobbyScore toLobbyScore() {
+		LobbyScore score = new LobbyScore();
+		
+		score.setSsrNorm((int)Math.round(1000000.0 * di(this.getSsr_norm())));
+		
+		score.setScoreKey(this.getScorekey());
+		score.setChartKey(this.getChartkey());
+		score.setMusicRate(di(dd(this.getRate()) * 100.0));
+		score.setMaxCombo(this.getMax_combo());
+		score.setEtternaValid(this.getValid());
+		score.setModString(this.getMods());
+		score.setMissCount(this.getMiss());
+		score.setBadCount(this.getBad());
+		score.setGoodCount(this.getGood());
+		score.setGreatCount(this.getGreat());
+		score.setPerfCount(this.getPerfect());
+		score.setMarvCount(this.getMarv());
+		score.setHitMineCount(this.getHitmine());
+		score.setHeldCount(this.getHeld());
+		score.setNgCount(this.getNg());
+		score.setLetgoCount(this.getLetgo());
+		score.setDateStr(this.getDatetime());
+		score.setNegBpm(ib(this.getNegsolo()));
+		score.setNoCC(ib(this.getNocc()));
+		score.setCalcVersion(this.getCalc_version());
+		score.setWifeVersion(this.getWifever());
+		score.setTopScore(this.getTopscore());
+		score.setBrittleKey(this.getHash());
+		score.setGuid(this.getUuid());
+		score.setWifePercent(this.getScore());
+		score.setJudgeScale(0.0);
+		score.setGrade(null);
+		score.setWifeGrade(null);
+		score.setSs1(this.getOverall());
+		score.setSs2(this.getStream());
+		score.setSs3(this.getJumpstream());
+		score.setSs4(this.getHandstream());
+		score.setSs5(this.getStamina());
+		score.setSs6(this.getJackSpeed());
+		score.setSs7(this.getChordjack());
+		score.setSs8(this.getTechnical());
+		
+		return score;
+	}
+	
+	private static Integer di(Double d) {
+		if (d == null) {
+			return 0;
+		}
+		return d.intValue();
+	}
+	
+	private static Double dd(Double d) {
+		if (d == null) {
+			return 0.0;
+		}
+		return d;
+	}
+	
+	private static Boolean ib(Integer i) {
+		if (i == null) {
+			return false;
+		}
+		return i == 1;
 	}
 
 }
