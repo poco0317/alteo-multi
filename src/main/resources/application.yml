@@ -15,6 +15,12 @@ spring:
     password: ${DB_PASS}
     url: ${DB_URL}
 
+etterna:
+  login:
+    provider-class: ${LOGIN_PROVIDER_CLASS}
+    api-url: ${LOGIN_API_URL}
+    api-key: ${LOGIN_API_KEY}
+    
 logging:
   level:
     #org.hibernate.SQL: DEBUG

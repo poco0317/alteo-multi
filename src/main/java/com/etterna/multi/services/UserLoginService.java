@@ -2,49 +2,34 @@ package com.etterna.multi.services;
 
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.etterna.multi.data.UserLogin;
-import com.etterna.multi.repo.UserLoginRepository;
+import com.etterna.multi.services.login.LoginProviderBase;
 
 @Service
 public class UserLoginService {
-	
-	private static final Logger m_logger = LoggerFactory.getLogger(UserLoginService.class);
-	
+		
 	@Autowired
-	private UserLoginRepository repo;
+	private ApplicationContext ctx;
 	
-	public UserLogin get(String username) {
-		return repo.findById(username.toLowerCase()).orElse(null);
+	private LoginProviderBase loginProvider;
+	
+	@Value("${etterna.login.provider-class}")
+	private String loginProviderClass;
+	
+	@EventListener
+	public void handleApplicationReadyEvent(ApplicationReadyEvent evt) throws Exception {
+		loginProvider = (LoginProviderBase) ctx.getBean(Class.forName(loginProviderClass));
 	}
 	
-	/**
-	 * Creates a new account with the given username and password.
-	 * Password is salted. Username is converted to lowercase.
-	 */
-	@Transactional
-	public boolean newUser(String username, String password) {
-		
-		final String salt = PasswordUtil.getSalt();
-		final String saltedPass = PasswordUtil.hashPassword(password, salt);
-		
-		UserLogin user = get(username);
-		if (user == null) {
-			m_logger.info("Created new user: {}", username.toLowerCase());
-			
-			user = new UserLogin();
-			user.setUsername(username.toLowerCase());
-			user.setPassword(saltedPass);
-			user.setSalt(salt);
-			repo.save(user);
-			return true;
-		} else {
-			return false;
-		}
+	public UserLogin get(String username) {
+		return loginProvider.get(username);
 	}
 	
 	/**
@@ -54,34 +39,7 @@ public class UserLoginService {
 	 */
 	@Transactional
 	public boolean login(String username, String password) {
-		
-		final UserLogin user = get(username);
-		if (user == null) {
-			// must create new user
-			
-			final boolean o = newUser(username, password);
-			if (o) {
-				m_logger.info("Logged in user: {}", username.toLowerCase());
-			} else {
-				m_logger.info("Failed user login (user already exists): {}", username.toLowerCase());
-			}
-			return o;
-		} else {
-			// user exists, verify that the password is correct
-			
-			final String salt = user.getSalt();
-			final String saltedPass = PasswordUtil.hashPassword(password, salt);
-			final String storedPass = user.getPassword();
-			
-			final boolean o = storedPass.equals(saltedPass); 
-			if (o) {
-				m_logger.info("Logged in user: {}", username.toLowerCase());
-				return true;
-			} else {
-				m_logger.info("Failed user login (bad password): {}", username.toLowerCase());
-				return false;
-			}
-		}
+		return loginProvider.login(username, password);
 	}
 
 }
