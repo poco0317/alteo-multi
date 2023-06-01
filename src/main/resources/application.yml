@@ -25,3 +25,6 @@ logging:
   level:
     #org.hibernate.SQL: DEBUG
     com.etterna: DEBUG
+
+jmx:
+  host: ${JMX_HOST}
