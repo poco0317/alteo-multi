@@ -150,6 +150,7 @@ public class EttpResponseMessageService {
 		String color = ColorUtil.colorUser(sender);
 		String coloredMessage = ColorUtil.colorize(sender.getUsername(), color) + ": " + message;
 		respondToLobby(lobby, CHAT_RESPONSE_TYPE, makeChatMessage(lobby.getName(), ChatMessageType.ROOM, coloredMessage));
+		auditDispatch.roomMessage(lobby, sender.getUsername(), message);
 	}
 	
 	/**

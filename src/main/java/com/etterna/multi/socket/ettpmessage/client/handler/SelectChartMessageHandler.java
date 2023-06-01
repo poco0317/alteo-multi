@@ -27,7 +27,7 @@ public class SelectChartMessageHandler extends EttpMessageHandler {
 			return;
 		}
 		if (!user.getLobby().canSelect(user)) {
-			responder.systemNoticeToUserInPrivate(user, ColorUtil.system("You don't have the rights to select a chart!"), user.getLobby().getName());
+			responder.systemNoticeToUserInRoom(user, ColorUtil.system("You don't have the rights to select a chart!"), user.getLobby().getName());
 			return;
 		}
 		

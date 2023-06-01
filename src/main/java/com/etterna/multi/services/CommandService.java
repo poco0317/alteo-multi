@@ -1,6 +1,5 @@
 package com.etterna.multi.services;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,10 +107,6 @@ public class CommandService {
 				return false;
 			}
 			return true;
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
 		} catch (Exception e) {
 			m_logger.error(e.getMessage(), e);
 			return false;

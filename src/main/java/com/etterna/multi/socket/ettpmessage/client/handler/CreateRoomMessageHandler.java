@@ -26,7 +26,7 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 		}
 		
 		if (msg.getName() == null) {
-			responder.systemNoticeToUserInGlobalChat(user, "Cannot use empty room name.");
+			responder.systemNoticeToUserInGlobalChat(user, "Cannot use an empty room name.");
 			return;
 		}
 		
@@ -37,7 +37,7 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 			responder.systemNoticeToLobby(user.getLobby(), "Welcome to your new room! Use /help to learn about commands.");
 		} else {
 			responder.respond(session, "createroom", new CreateRoomResponseMessage(false));
-			responder.systemNoticeToUserInGlobalChat(user, "Room name already in use.");
+			responder.systemNoticeToUserInGlobalChat(user, "Room name '" + msg.getName() + "' is already in use.");
 		}
 	}
 	

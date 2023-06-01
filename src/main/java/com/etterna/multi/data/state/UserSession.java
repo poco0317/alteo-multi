@@ -74,7 +74,7 @@ public class UserSession {
 				messaging.systemNoticeToLobby(lobby, getUsername() + " disabled force start.");
 			}
 		} else {
-			messaging.systemNoticeToUserInPrivate(this, "You can't set force start.", lobby.getName());
+			messaging.systemNoticeToUserInRoom(this, "You can't set force start. Must be /op'd or owner.", lobby.getName());
 		}
 	}
 	
@@ -89,7 +89,7 @@ public class UserSession {
 				messaging.systemNoticeToLobby(lobby, getUsername() + " disabled freepick. Only Operators and the Owner can pick a song.");
 			}
 		} else {
-			messaging.systemNoticeToUserInPrivate(this, "You can't set free song selection.", lobby.getName());
+			messaging.systemNoticeToUserInRoom(this, "You can't set free song selection. Must be /op'd or owner.", lobby.getName());
 		}
 	}
 	
@@ -104,7 +104,7 @@ public class UserSession {
 				messaging.systemNoticeToLobby(lobby, getUsername() + " disabled freerate. The song selector picks the rate.");
 			}
 		} else {
-			messaging.systemNoticeToUserInPrivate(this, "You can't set free rate selection.", lobby.getName());
+			messaging.systemNoticeToUserInRoom(this, "You can't set free rate selection. Must be /op'd or owner.", lobby.getName());
 		}
 	}
 	
