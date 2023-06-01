@@ -103,7 +103,7 @@ public class Lobby {
 		PacklistResponseMessage response = new PacklistResponseMessage(this);
 		messaging.respondToLobby(this, "packlist", response);
 	}
-		
+	
 	public boolean canSelect(UserSession user) {
 		return freepick || isOwner(user) || isOperator(user); 
 	}
@@ -111,7 +111,7 @@ public class Lobby {
 	public String canStart(UserSession user) {
 		String errors = "";
 		List<UserSession> busyplayers = players.stream().filter(p -> !p.getState().equals(PlayerState.READY)).collect(Collectors.toList());
-		if (busyplayers.size() > 0) {
+		if (!forcestart && busyplayers.size() > 0) {
 			errors += "Busy Players: ";
 			for (UserSession u : busyplayers) {
 				errors += u.getUsername() + ", ";
