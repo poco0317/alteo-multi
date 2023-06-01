@@ -396,6 +396,34 @@ public class MultiplayerService {
 		}
 	}
 	
+	public void toggleOperator(UserSession executor, String recipient) {
+		if (executor == null || executor.getLobby() == null) return;
+		
+		Lobby lobby = executor.getLobby();
+		if (lobby.isOwner(executor)) {
+			UserSession target = sessionService.getByUsername(recipient);
+			if (target == null || !executor.getLobby().equals(target.getLobby())) {
+				responder.systemNoticeToUserInRoom(executor, "'"+recipient+"' is not in your room.", lobby.getName());
+				return;
+			}
+			
+			if (target.equals(executor)) {
+				responder.systemNoticeToUserInRoom(executor, "You are already above an operator.", lobby.getName());
+				return;
+			}
+			
+			if (lobby.isOwner(target)) {
+				responder.systemNoticeToUserInRoom(executor, "'"+recipient+"' is the room owner and cannot be added as operator.", lobby.getName());
+				return;
+			}
+			
+			final String added = lobby.toggleOperator(target) ? " added " : " removed ";
+			responder.systemNoticeToLobby(lobby, executor.getUsername() + added +recipient+" as an operator.");
+		} else {
+			responder.systemNoticeToUserInRoom(executor, "You don't have permission to toggle operator on a user.", lobby.getName());
+		}
+	}
+	
 	
 	/**
 	 * A client talks to the server for the first time to inform of generic client information

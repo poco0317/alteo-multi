@@ -261,6 +261,21 @@ public class CommandService {
 		multiplayer.unbanFromLobby(user, data.getArgs().get(0));
 	}
 	
+	@CommandAlias(values = {"oper", "operator", "unop", "unoper", "deop", "deoper", "unoperator", "deoperator"})
+	@HelpMessage(desc = "Give or remove operator (moderator) status to a member in your room", usage = "/op <user>", requiresOwner = true)
+	void cmd_op(CommandData data, UserSession user) {
+		if (user.getLobby() == null) {
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
+			return;
+		}
+		if (data.getArgs() == null && data.getArgs().size() == 0) {
+			responder.systemNoticeToUserInContext(user, "Please provide a user name to give or take op status.", data.getMsgData().getMsgtype(), data.getMsgData().getTab());
+			return;
+		}
+		
+		multiplayer.toggleOperator(user, data.getArgs().get(0));
+	}
+	
 	
 	private class CommandData {
 		private List<String> args;

@@ -165,6 +165,20 @@ public class Lobby {
 		return isOwner(user) || isOperator(user);
 	}
 	
+	/**
+	 * Returns true if a new operator was added
+	 */
+	public boolean toggleOperator(UserSession user) {
+		if (isOperator(user)) {
+			operators.remove(user);
+			return false;
+		} else {
+			operators.add(user);
+			return true;
+		}
+	}
+	
+	
 	public void calcCommonPacks() {
 		Set<String> packs = new HashSet<>();
 		if (players.size() > 0) {
