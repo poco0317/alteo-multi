@@ -68,11 +68,15 @@ public class LobbyAuditingDispatch {
 		newLobby = lobbies.save(newLobby);
 	}
 	
+	private GameLobby lobbyFromLobby(Lobby l) {
+		return lobbies.findById(l.getDbGameLobby().getId()).orElse(null);
+	}
+	
 	@Transactional
 	public void roomDeletion(Lobby lobby) {
 		m_logger.trace("Recording user room ending");
 		
-		GameLobby newLobby = lobby.getDbGameLobby();
+		GameLobby newLobby = lobbyFromLobby(lobby);
 		newLobby.setActive(false);
 		newLobby = lobbies.save(newLobby);
 	}
@@ -81,7 +85,7 @@ public class LobbyAuditingDispatch {
 	public void roomParticipant(UserSession user) {
 		m_logger.trace("Recording user room participation");
 		
-		GameLobby l = user.getLobby().getDbGameLobby();
+		GameLobby l = lobbyFromLobby(user.getLobby());
 		l.getUsers().add(logins.get(user.getUsername()));
 		l = lobbies.save(l);
 	}
@@ -94,7 +98,7 @@ public class LobbyAuditingDispatch {
 		msg.setContent(content);
 		msg.setSender(sender);
 		msg.setSent(new Date());
-		msg.setLobby(lobby.getDbGameLobby());
+		msg.setLobby(lobbyFromLobby(lobby));
 		msg = messages.save(msg);
 	}
 	
@@ -103,7 +107,7 @@ public class LobbyAuditingDispatch {
 		m_logger.trace("Recording room score");
 		
 		LobbyScore score = scoreMsg.toLobbyScore();
-		score.setLobby(user.getLobby().getDbGameLobby());
+		score.setLobby(lobbyFromLobby(user.getLobby()));
 		score.setUser(logins.get(user.getUsername()));
 		score = scores.save(score);
 	}
