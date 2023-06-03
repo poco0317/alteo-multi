@@ -46,3 +46,9 @@ To start the server, simply run `./start.sh` and it will open in the background.
 
 You can use `watch tail -50 ./log.txt` to watch the log of the application in real time.
 
+If you need a script that finds and kills the server for you, use this:
+```
+#!/bin/bash
+ps -ef | grep alteo-multi | grep -v grep | awk '{print $2}' | xargs kill`
+```
+
