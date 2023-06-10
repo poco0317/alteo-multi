@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import javax.annotation.PostConstruct;
 
@@ -232,6 +233,40 @@ public class CommandService {
 		multiplayer.toggleFreerate(user);
 	}
 	
+	@CommandAlias(values = {"randint"})
+	@HelpMessage(desc = "Roll a number between 1 and x. If x is not given, uses 100 instead", usage = "/roll [x]")
+	void cmd_roll(CommandData data, UserSession user) {
+		int max = 100;
+		if (data.getArgs() == null || data.getArgs().size() == 0) {
+			try {
+				max = Integer.parseInt(data.getArgs().get(0));
+			} catch (Exception e) {}
+		}
+		if (max < 1) max = 1;
+		final int r = new Random().nextInt(max) + 1;
+		final String msg = String.format("%s rolled a %d out of %d", user.getUsername(), r, max);
+		ChatMessageType msgType = ChatMessageType.fromInt(data.getMsgData().getMsgtype());
+		switch (msgType) {
+			default:
+			case LOBBY: {
+				multiplayer.systemMessageToGlobalChat(msg);
+				break;
+			}
+			case ROOM: {
+				responder.systemNoticeToLobby(user.getLobby(), msg);
+				break;
+			}
+			case PRIVATE: {
+				UserSession otherUser = sessions.getByUsername(data.getMsgData().getTab());
+				if (otherUser != null) {
+					responder.systemNoticeToUserInPrivate(user, msg, data.getMsgData().getTab());
+					responder.systemNoticeToUserInPrivate(otherUser, msg, user.getUsername());
+				}
+				break;
+			}
+		}
+	}
+	
 	@CommandAlias(values = {"ban"})
 	@HelpMessage(desc = "Kick and ban a user from your room", usage = "/kick <user>", requiresOper = true)
 	void cmd_kick(CommandData data, UserSession user) {
@@ -239,7 +274,7 @@ public class CommandService {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 			return;
 		}
-		if (data.getArgs() == null && data.getArgs().size() == 0) {
+		if (data.getArgs() == null || data.getArgs().size() == 0) {
 			responder.systemNoticeToUserInContext(user, "Please provide the name to kick.", data.getMsgData().getMsgtype(), data.getMsgData().getTab());
 			return;
 		}
@@ -253,7 +288,7 @@ public class CommandService {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 			return;
 		}
-		if (data.getArgs() == null && data.getArgs().size() == 0) {
+		if (data.getArgs() == null || data.getArgs().size() == 0) {
 			responder.systemNoticeToUserInContext(user, "Please provide the name to kick.", data.getMsgData().getMsgtype(), data.getMsgData().getTab());
 			return;
 		}
@@ -268,7 +303,7 @@ public class CommandService {
 			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 			return;
 		}
-		if (data.getArgs() == null && data.getArgs().size() == 0) {
+		if (data.getArgs() == null || data.getArgs().size() == 0) {
 			responder.systemNoticeToUserInContext(user, "Please provide a user name to give or take op status.", data.getMsgData().getMsgtype(), data.getMsgData().getTab());
 			return;
 		}
