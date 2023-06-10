@@ -237,7 +237,7 @@ public class CommandService {
 	@HelpMessage(desc = "Roll a number between 1 and x. If x is not given, uses 100 instead", usage = "/roll [x]")
 	void cmd_roll(CommandData data, UserSession user) {
 		int max = 100;
-		if (data.getArgs() == null || data.getArgs().size() == 0) {
+		if (data.getArgs() != null && data.getArgs().size() > 0) {
 			try {
 				max = Integer.parseInt(data.getArgs().get(0));
 			} catch (Exception e) {}
