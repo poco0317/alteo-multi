@@ -94,7 +94,7 @@ public class SessionService {
 		sessions.put(session.getId(), user);
 	}
 
-	public void ping(WebSocketSession session) {
+	public void updateLastPing(WebSocketSession session) {
 		UserSession user = get(session);
 		if (user != null) {
 			user.setLastPing(System.currentTimeMillis());

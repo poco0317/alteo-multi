@@ -83,7 +83,7 @@ public class MultiplayerService {
 	 * Reset the ping time for a session to make sure it stays alive
 	 */
 	public void pingSession(WebSocketSession session) {
-		sessionService.ping(session);
+		sessionService.updateLastPing(session);
 	}
 	
 	/**

@@ -12,7 +12,7 @@ public class PingMessageHandler extends EttpMessageHandler {
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) {
-		sessions.ping(session);
+		sessions.updateLastPing(session);
 		
 		if (m_logger.isDebugEnabled()) {
 			UserSession user = sessions.get(session);

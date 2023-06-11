@@ -38,12 +38,10 @@ public class EttpResponseMessageService {
 			EttpMessageResponse<T> response = new EttpMessageResponse<>();
 			response.setPayload(ettpMessageResponse);
 			response.setType(messageType);
+			m_logger.info("Sending msg {} to {} {}", messageType, session.getRemoteAddress().toString(), session.getLocalAddress().toString());
 			session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
 		} catch (Exception e) {
 			m_logger.error(e.getMessage(), e);
-			if (e.getCause() != null) {
-				m_logger.error("furthermore: "+e.getCause().getMessage(), e.getCause());
-			}
 		}
 	}
 	

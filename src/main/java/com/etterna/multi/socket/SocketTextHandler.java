@@ -41,6 +41,9 @@ public class SocketTextHandler extends TextWebSocketHandler {
 	@Autowired
 	private HelloMessageHandler hello;
 	
+	// set true to only log message types
+	private static boolean SIMPLE_LOG = true;
+	
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message) {
 		
@@ -58,7 +61,7 @@ public class SocketTextHandler extends TextWebSocketHandler {
 			return;
 		}
 		
-		if (message.getPayload() != null && message.getPayload().contains("pass")) {
+		if ((message.getPayload() != null && message.getPayload().contains("pass")) || SIMPLE_LOG) {
 			m_logger.debug("Got message type: {}", ettpMessage.getType());
 		} else {
 			m_logger.debug("Got message: {}", message.getPayload());
