@@ -135,7 +135,7 @@ public class Lobby {
 		}
 		if (users.size() > 2) {
 			String most = String.join(", ", users.subList(0, users.size() - 1).stream().map(u -> u.getUsername()).collect(Collectors.toList()));
-			most += ", and " + users.get(users.size()-1);
+			most += ", and " + users.get(users.size()-1).getUsername();
 			return most;
 		}
 		return "";
