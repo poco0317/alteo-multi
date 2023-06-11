@@ -80,7 +80,7 @@ public class SocketTextHandler extends TextWebSocketHandler {
 			}
 		} catch (Exception e) {
 			m_logger.warn("Unknown incoming message type: {}", ettpMessage.getType());
-			e.printStackTrace();
+			m_logger.error(e.getMessage(), e);
 			return;
 		}
 	}
