@@ -90,7 +90,8 @@ public class SessionService {
 
 	public void register(WebSocketSession session) {
 		UserSession user = ctx.getBean(UserSession.class);
-		user.setSession(new ConcurrentWebSocketSessionDecorator(session, WS_SEND_LIMIT_MILLIS, WS_MSG_QUEUE_BUFFER_SIZE_BYTES));
+		//user.setSession(new ConcurrentWebSocketSessionDecorator(session, WS_SEND_LIMIT_MILLIS, WS_MSG_QUEUE_BUFFER_SIZE_BYTES));
+		user.setSession(session);
 		sessions.put(session.getId(), user);
 	}
 
