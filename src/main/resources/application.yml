@@ -2,7 +2,7 @@ server:
   port: ${SOCKET_PORT}
   tomcat:
     threads:
-      max: 1
+      max: 20
 spring:
   main:
     allow-circular-references: true

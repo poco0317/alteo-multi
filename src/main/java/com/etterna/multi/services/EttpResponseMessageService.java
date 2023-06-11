@@ -31,7 +31,7 @@ public class EttpResponseMessageService {
 	/**
 	 * Send a particular data carrying message to a given session
 	 */
-	public <T> void respond(WebSocketSession session, String messageType, T ettpMessageResponse) {
+	public synchronized <T> void respond(WebSocketSession session, String messageType, T ettpMessageResponse) {
 		if (session == null || !session.isOpen()) return;
 		try {
 			EttpMessageResponse<T> response = new EttpMessageResponse<>();
