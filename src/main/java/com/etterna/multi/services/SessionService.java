@@ -13,7 +13,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import com.etterna.multi.data.state.UserSession;
 
@@ -90,7 +89,6 @@ public class SessionService {
 
 	public void register(WebSocketSession session) {
 		UserSession user = ctx.getBean(UserSession.class);
-		//user.setSession(new ConcurrentWebSocketSessionDecorator(session, WS_SEND_LIMIT_MILLIS, WS_MSG_QUEUE_BUFFER_SIZE_BYTES));
 		user.setSession(session);
 		sessions.put(session.getId(), user);
 	}
