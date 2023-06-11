@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import com.etterna.multi.data.state.UserSession;
 
@@ -27,6 +28,8 @@ public class SessionService {
 	
 	public static final long MAX_MILLIS_BETWEEN_HEARTBEATS = 30L * 1000L; // 30sec
 	public static final long MILLIS_BETWEEN_STANDARD_HEARTBEAT = 10L * 1000L; // 10sec
+	public static final int WS_SEND_LIMIT_MILLIS = 1000 * 10; // 10sec
+	public static final int WS_MSG_QUEUE_BUFFER_SIZE_BYTES = 1024 * 1024; // 1mb
 
 	// session ids to UserSessions
 	// UserSessions dont necessarily have any user logged in
@@ -87,7 +90,7 @@ public class SessionService {
 
 	public void register(WebSocketSession session) {
 		UserSession user = ctx.getBean(UserSession.class);
-		user.setSession(session);
+		user.setSession(new ConcurrentWebSocketSessionDecorator(session, WS_SEND_LIMIT_MILLIS, WS_MSG_QUEUE_BUFFER_SIZE_BYTES));
 		sessions.put(session.getId(), user);
 	}
 
