@@ -28,7 +28,7 @@ public class SessionService {
 	
 	public static final long MAX_MILLIS_BETWEEN_HEARTBEATS = 30L * 1000L; // 30sec
 	public static final long MILLIS_BETWEEN_STANDARD_HEARTBEAT = 10L * 1000L; // 10sec
-	public static final int WS_SEND_LIMIT_MILLIS = 1000 * 10; // 10sec
+	public static final int WS_SEND_LIMIT_MILLIS = 1000 * 45; // 45sec
 	public static final int WS_MSG_QUEUE_BUFFER_SIZE_BYTES = 1024 * 1024; // 1mb
 
 	// session ids to UserSessions

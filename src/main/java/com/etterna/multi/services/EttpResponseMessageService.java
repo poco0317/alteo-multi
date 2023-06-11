@@ -1,6 +1,7 @@
 package com.etterna.multi.services;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,9 @@ public class EttpResponseMessageService {
 			session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
 		} catch (Exception e) {
 			m_logger.error(e.getMessage(), e);
+			if (e.getCause() != null) {
+				m_logger.error("furthermore: "+e.getCause().getMessage(), e.getCause());
+			}
 		}
 	}
 	
@@ -64,8 +68,9 @@ public class EttpResponseMessageService {
 	 */
 	public <T> void respondToUsers(Collection<UserSession> users, String messageType, T ettpMessageResponse) {
 		if (users == null) return;
-		for (UserSession user : users) {
-			respond(user.getSession(), messageType, ettpMessageResponse);
+		Iterator<UserSession> it = users.iterator();
+		while (it.hasNext()) {
+			respond(it.next(), messageType, ettpMessageResponse);
 		}
 	}
 	
