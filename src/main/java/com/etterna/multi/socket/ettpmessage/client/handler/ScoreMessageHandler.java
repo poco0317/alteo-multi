@@ -32,6 +32,9 @@ public class ScoreMessageHandler extends EttpMessageHandler {
 		ScoreResponseMessage score = new ScoreResponseMessage();
 		score.setName(user.getUsername());
 		score.setScore(message.getPayload());
+		
+		m_logger.info("Processing score from {} - {} {} - {} - {} - {}", user.getUsername(), msg.getChartkey(), msg.getScorekey(), msg.getSsr_norm(), msg.getMods(), msg.getRate());
+		
 		responder.respondToLobby(user.getLobby(), "score", score);
 		String pb = msg.getTopscore() == 1 ? " - a new PB!" : "";
 		responder.systemNoticeToLobby(user.getLobby(), 
