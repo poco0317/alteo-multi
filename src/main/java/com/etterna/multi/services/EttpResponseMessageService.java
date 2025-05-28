@@ -32,16 +32,18 @@ public class EttpResponseMessageService {
 	/**
 	 * Send a particular data carrying message to a given session
 	 */
-	public synchronized <T> void respond(WebSocketSession session, String messageType, T ettpMessageResponse) {
+	public <T> void respond(WebSocketSession session, String messageType, T ettpMessageResponse) {
 		if (session == null || !session.isOpen()) return;
-		try {
-			EttpMessageResponse<T> response = new EttpMessageResponse<>();
-			response.setPayload(ettpMessageResponse);
-			response.setType(messageType);
-			m_logger.info("Sending messageType {} to {}", messageType, session.getRemoteAddress().toString());
-			session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
-		} catch (Exception e) {
-			m_logger.error(e.getMessage(), e);
+		synchronized (session) {
+			try {
+				EttpMessageResponse<T> response = new EttpMessageResponse<>();
+				response.setPayload(ettpMessageResponse);
+				response.setType(messageType);
+				m_logger.info("Sending messageType {} to {}", messageType, session.getRemoteAddress().toString());
+				session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
+			} catch (Exception e) {
+				m_logger.error(e.getMessage(), e);
+			}
 		}
 	}
 	
