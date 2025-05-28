@@ -23,6 +23,11 @@ etterna:
     provider-class: ${LOGIN_PROVIDER_CLASS}
     api-url: ${LOGIN_API_URL}
     api-key: ${LOGIN_API_KEY}
+
+discord:
+  token: ${DISCORD_TOKEN}
+  webhook: ${DISCORD_WEBHOOK}
+  channelid: ${DISCORD_CHANNELID}
     
 logging:
   level:
