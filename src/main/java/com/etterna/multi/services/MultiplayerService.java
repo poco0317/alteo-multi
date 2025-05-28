@@ -16,6 +16,7 @@ import org.springframework.web.socket.WebSocketSession;
 import com.etterna.multi.data.state.Chart;
 import com.etterna.multi.data.state.Lobby;
 import com.etterna.multi.data.state.UserSession;
+import com.etterna.multi.discord.BotManager;
 import com.etterna.multi.socket.ettpmessage.client.payload.CreateRoomMessage;
 import com.etterna.multi.socket.ettpmessage.client.payload.EnterRoomMessage;
 import com.etterna.multi.socket.ettpmessage.client.payload.HelloMessage;
@@ -34,6 +35,8 @@ import com.etterna.multi.socket.ettpmessage.server.payload.StartChartResponseMes
 public class MultiplayerService {
 	
 	private static final Logger m_logger = LoggerFactory.getLogger(MultiplayerService.class);
+	
+	private static final String SYSTEM_USER = "SYSTEM";
 
 	@Autowired
 	private UserLoginService loginService;
@@ -124,12 +127,29 @@ public class MultiplayerService {
 		sessionService.executeForAllLoggedInSessions(session -> {
 			responder.userChatToGlobalChat(session, sender.getUsername(), message);
 		});
+		
+		BotManager.sendWebhookMessage(sender.getUsername() + " (ingame)", message);
+	}
+	
+	public void chatToMainLobby(String username, String message) {
+		if (username == null || message == null) {
+			return;
+		}
+		
+		sessionService.executeForAllLoggedInSessions(session -> {
+			responder.userChatToGlobalChat(session, username, message);
+		});
+		
+		// we dont send a webhook message for this because this should only be invoked 
+		// via discord which is where the webhook already posts
 	}
 	
 	public void systemMessageToGlobalChat(String message) {
 		sessionService.executeForAllLoggedInSessions(session -> {
 			responder.systemNoticeToUserInGlobalChat(session, message);
 		});
+		
+		BotManager.sendWebhookMessage(SYSTEM_USER, message);
 	}
 	
 	/**
