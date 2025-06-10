@@ -157,6 +157,7 @@ public class LobbyService {
 		
 		if (lobby.getPlayers().isEmpty()) {
 			lobby.broadcastDeletion();
+			rooms.remove(lobby.getName().toLowerCase());
 		} else {
 			lobby.broadcastUserLeft(user);
 		}
