@@ -79,6 +79,7 @@ public class Lobby {
 	
 	public void broadcastDeletion() {
 		multiplayer.respondAllSessions("deleteroom", new DeleteRoomResponseMessage(this));
+		multiplayer.systemMessageToGlobalChat("Room '"+getName()+"' has closed.");
 		auditDispatch.roomDeletion(this);
 	}
 	
