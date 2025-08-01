@@ -136,6 +136,7 @@ public class BotManager {
 			return;
 		}
 		
+		m_logger.info("Webhook message user '{}' :: content '{}'", username, content);
 		WebhookMessage msg = new WebhookMessageBuilder()
 				.setUsername(username)
 				.setContent(content)
