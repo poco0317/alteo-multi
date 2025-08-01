@@ -44,9 +44,7 @@ public class EttpResponseMessageService {
 			response.setType(messageType);
 			m_logger.info("Queueing messageType {} to {}", messageType, session.getSession().getRemoteAddress().toString());
 			session.getQueuedMessages().add(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
-			m_logger.info("here1");
 			session.drainQueuedMessages(queuedSessionMessageExecutor);
-			m_logger.info("here2");
 		} catch (Exception e) {
 			m_logger.error(e.getMessage(), e);
 		}
@@ -57,16 +55,13 @@ public class EttpResponseMessageService {
 		queuedSessionMessageExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
-				m_logger.info("here3");
 				m_logger.info("Directly sending messageType {} to {} ({})", messageType, session.getId(), session.getRemoteAddress().toString());
 				EttpMessageResponse<T> response = new EttpMessageResponse<>();
 				response.setPayload(ettpMessageResponse);
 				response.setType(messageType);
 				synchronized (session) {
 					try {
-						m_logger.info("here4");
 						session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
-						m_logger.info("here5");
 					} catch (IOException e) {
 						m_logger.error(e.getMessage(), e);
 					}
@@ -80,13 +75,10 @@ public class EttpResponseMessageService {
 			@Override
 			public void run() {
 				try {
-					m_logger.info("here6");
 					while (!session.getQueuedMessages().isEmpty()) {
-						m_logger.info("here7");
 						sendNextQueuedMessageToSession(session);
 					}
 					session.setDrainInProgress(false);
-					m_logger.info("here8");
 				} catch (Exception e) {
 					m_logger.error(e.getMessage(), e);
 				}
@@ -98,12 +90,9 @@ public class EttpResponseMessageService {
 		try {
 			TextMessage message = session.getQueuedMessages().poll();
 			if (message == null) return;
-			m_logger.info("here9");
 			m_logger.info("Sending message length {} to {} ({})", message.getPayloadLength(), session.getSession().getId(), session.getSession().getRemoteAddress().toString());
 			synchronized (session.getSession()) {
-				m_logger.info("hereA");
 				session.getSession().sendMessage(message);
-				m_logger.info("hereB");
 			}
 		} catch (IOException e) {
 			m_logger.error(e.getMessage(), e);
