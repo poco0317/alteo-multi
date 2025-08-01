@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.etterna.multi.data.state.UserSession;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.client.payload.LoginMessage;
@@ -29,7 +30,8 @@ public class LoginMessageHandler extends EttpMessageHandler {
 			response.setLogged(false);
 			response.setMsg("Login failed for some reason.");
 		}
-		responder.respond(session, "login", response);
+		UserSession user = sessions.get(session);
+		responder.respond(user, "login", response);
 	}
 	
 	@Getter @Setter

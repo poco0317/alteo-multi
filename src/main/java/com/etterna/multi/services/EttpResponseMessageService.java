@@ -1,7 +1,10 @@
 package com.etterna.multi.services;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,31 +31,83 @@ public class EttpResponseMessageService {
 	private static final String CHAT_RESPONSE_TYPE = "chat";
 	
 	private static final ObjectMapper mapper = Util.objectMapper();
+	private ExecutorService queuedSessionMessageExecutor = Executors.newCachedThreadPool(Executors.defaultThreadFactory());
 	
 	/**
 	 * Send a particular data carrying message to a given session
 	 */
-	public <T> void respond(WebSocketSession session, String messageType, T ettpMessageResponse) {
-		if (session == null || !session.isOpen()) return;
-		synchronized (session) {
-			try {
-				EttpMessageResponse<T> response = new EttpMessageResponse<>();
-				response.setPayload(ettpMessageResponse);
-				response.setType(messageType);
-				m_logger.info("Sending messageType {} to {}", messageType, session.getRemoteAddress().toString());
-				session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
-			} catch (Exception e) {
-				m_logger.error(e.getMessage(), e);
-			}
+	public <T> void respond(UserSession session, String messageType, T ettpMessageResponse) {
+		if (session == null || session.getSession() == null || !session.getSession().isOpen()) return;
+		try {
+			EttpMessageResponse<T> response = new EttpMessageResponse<>();
+			response.setPayload(ettpMessageResponse);
+			response.setType(messageType);
+			m_logger.info("Queueing messageType {} to {}", messageType, session.getSession().getRemoteAddress().toString());
+			session.getQueuedMessages().add(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
+			m_logger.info("here1");
+			session.drainQueuedMessages(queuedSessionMessageExecutor);
+			m_logger.info("here2");
+		} catch (Exception e) {
+			m_logger.error(e.getMessage(), e);
 		}
 	}
 	
-	/**
-	 * Send a particular data carrying message to a given user session
-	 */
-	public <T> void respond(UserSession session, String messageType, T ettpMessageResponse) {
-		if (session == null) return;
-		respond(session.getSession(), messageType, ettpMessageResponse);
+	public <T> void respondToDirectSession(WebSocketSession session, String messageType, T ettpMessageResponse) {
+		if (session == null || !session.isOpen()) return;
+		queuedSessionMessageExecutor.submit(new Runnable() {
+			@Override
+			public void run() {
+				m_logger.info("here3");
+				m_logger.info("Directly sending messageType {} to {} ({})", messageType, session.getId(), session.getRemoteAddress().toString());
+				EttpMessageResponse<T> response = new EttpMessageResponse<>();
+				response.setPayload(ettpMessageResponse);
+				response.setType(messageType);
+				synchronized (session) {
+					try {
+						m_logger.info("here4");
+						session.sendMessage(new TextMessage(mapper.writerFor(response.getClass()).writeValueAsString(response)));
+						m_logger.info("here5");
+					} catch (IOException e) {
+						m_logger.error(e.getMessage(), e);
+					}
+				}
+			}
+		});
+	}
+	
+	public Runnable getMessageDrainRunnable(UserSession session) {
+		return new Runnable() {
+			@Override
+			public void run() {
+				try {
+					m_logger.info("here6");
+					while (!session.getQueuedMessages().isEmpty()) {
+						m_logger.info("here7");
+						sendNextQueuedMessageToSession(session);
+					}
+					session.setDrainInProgress(false);
+					m_logger.info("here8");
+				} catch (Exception e) {
+					m_logger.error(e.getMessage(), e);
+				}
+			}
+		};
+	}
+	
+	private <T> void sendNextQueuedMessageToSession(UserSession session) {
+		try {
+			TextMessage message = session.getQueuedMessages().poll();
+			if (message == null) return;
+			m_logger.info("here9");
+			m_logger.info("Sending message length {} to {} ({})", message.getPayloadLength(), session.getSession().getId(), session.getSession().getRemoteAddress().toString());
+			synchronized (session.getSession()) {
+				m_logger.info("hereA");
+				session.getSession().sendMessage(message);
+				m_logger.info("hereB");
+			}
+		} catch (IOException e) {
+			m_logger.error(e.getMessage(), e);
+		}
 	}
 	
 	/**
@@ -112,7 +167,7 @@ public class EttpResponseMessageService {
 		if (roomToSendTo != null) {
 			tab = roomToSendTo;
 		}
-		respond(user.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage(tab, ChatMessageType.PRIVATE, ColorUtil.system(message)));
+		respond(user, CHAT_RESPONSE_TYPE, makeChatMessage(tab, ChatMessageType.PRIVATE, ColorUtil.system(message)));
 	}
 	
 	/**
@@ -125,7 +180,7 @@ public class EttpResponseMessageService {
 		if (roomToSendTo != null) {
 			tab = roomToSendTo;
 		}
-		respond(user.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage(tab, ChatMessageType.ROOM, ColorUtil.system(message)));
+		respond(user, CHAT_RESPONSE_TYPE, makeChatMessage(tab, ChatMessageType.ROOM, ColorUtil.system(message)));
 	}
 	
 	/**
@@ -133,7 +188,7 @@ public class EttpResponseMessageService {
 	 */
 	public void systemNoticeToUserInGlobalChat(UserSession user, String message) {
 		if (user == null) return;
-		respond(user.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage("", ChatMessageType.LOBBY, ColorUtil.system(message)));
+		respond(user, CHAT_RESPONSE_TYPE, makeChatMessage("", ChatMessageType.LOBBY, ColorUtil.system(message)));
 	}
 	
 	/**
@@ -164,8 +219,8 @@ public class EttpResponseMessageService {
 	public void userChatPrivatelyToUser(UserSession sender, UserSession recipient, String message) {
 		if (sender == null || recipient == null || sender.getUsername() == null || recipient.getUsername() == null) return;
 		String msgLine = sender.getUsername() + ": " + message;
-		respond(sender.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage(recipient.getUsername(), ChatMessageType.PRIVATE, msgLine));
-		respond(recipient.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage(sender.getUsername(), ChatMessageType.PRIVATE, msgLine));
+		respond(sender, CHAT_RESPONSE_TYPE, makeChatMessage(recipient.getUsername(), ChatMessageType.PRIVATE, msgLine));
+		respond(recipient, CHAT_RESPONSE_TYPE, makeChatMessage(sender.getUsername(), ChatMessageType.PRIVATE, msgLine));
 	}
 	
 	/**
@@ -176,7 +231,7 @@ public class EttpResponseMessageService {
 	public void userChatToGlobalChat(UserSession recipient, final String senderName, String message) {
 		if (recipient == null || recipient.getUsername() == null || senderName == null) return;
 		String msgLine = senderName + ": " + message;
-		respond(recipient.getSession(), CHAT_RESPONSE_TYPE, makeChatMessage("", ChatMessageType.LOBBY, msgLine));
+		respond(recipient, CHAT_RESPONSE_TYPE, makeChatMessage("", ChatMessageType.LOBBY, msgLine));
 	}
 
 }

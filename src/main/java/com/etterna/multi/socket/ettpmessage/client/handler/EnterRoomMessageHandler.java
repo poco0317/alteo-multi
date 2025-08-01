@@ -30,7 +30,7 @@ public class EnterRoomMessageHandler extends EttpMessageHandler {
 				msg.setDesc("");
 			}
 			multiplayer.createLobby(session, msg);
-			responder.respond(session, "enterroom", new EnterRoomResponseMessage(true));
+			responder.respond(user, "enterroom", new EnterRoomResponseMessage(true));
 		} else {
 			multiplayer.tryToJoinLobby(user, msg.getName(), msg.getPass());
 		}

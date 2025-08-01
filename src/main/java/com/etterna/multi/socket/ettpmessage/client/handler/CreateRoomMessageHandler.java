@@ -32,11 +32,11 @@ public class CreateRoomMessageHandler extends EttpMessageHandler {
 		
 		multiplayer.removeFromLobby(user);
 		if (multiplayer.createLobby(session, msg)) {
-			responder.respond(session, "createroom", new CreateRoomResponseMessage(true));
+			responder.respond(user, "createroom", new CreateRoomResponseMessage(true));
 			multiplayer.systemMessageToGlobalChat(user.getUsername() + " created room '"+msg.getName()+"'");
 			responder.systemNoticeToLobby(user.getLobby(), "Welcome to your new room! Use /help to learn about commands.");
 		} else {
-			responder.respond(session, "createroom", new CreateRoomResponseMessage(false));
+			responder.respond(user, "createroom", new CreateRoomResponseMessage(false));
 			responder.systemNoticeToUserInGlobalChat(user, "Room name '" + msg.getName() + "' is already in use.");
 		}
 	}

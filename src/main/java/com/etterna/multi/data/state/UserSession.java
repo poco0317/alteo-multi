@@ -2,10 +2,13 @@ package com.etterna.multi.data.state;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.etterna.multi.services.EttpResponseMessageService;
@@ -47,8 +50,18 @@ public class UserSession {
 	private boolean isReady = false;
 	private Lobby lobby;
 	
+	// FIFO queue of pending websocket messages to send by worker thread(s)
+	private ConcurrentLinkedQueue<TextMessage> queuedMessages = new ConcurrentLinkedQueue<>();
+	private boolean drainInProgress = false;
+	
 	private double gameplayWife;
 	private String gameplayJudgments;
+	
+	public void drainQueuedMessages(ExecutorService executor) {
+		if (drainInProgress) return;
+		drainInProgress = true;
+		executor.submit(messaging.getMessageDrainRunnable(this));
+	}
 	
 	public void toggleReady() {
 		if (getLobby() == null) return;
@@ -152,7 +165,7 @@ public class UserSession {
 		lobbyService.enterLobby(this, lobby);
 		
 		// put the user in the room
-		messaging.respond(getSession(), "enterroom", new EnterRoomResponseMessage(true));
+		messaging.respond(this, "enterroom", new EnterRoomResponseMessage(true));
 		
 		// tell everyone there that they joined
 		messaging.systemNoticeToLobby(lobby, getUsername()+" joined.");
@@ -165,7 +178,7 @@ public class UserSession {
 		
 		// if there was a chart selected, put the user on it
 		if (lobby.getChart() != null) {
-			messaging.respond(getSession(), "selectchart", null);
+			messaging.respond(this, "selectchart", null);
 		}
 	}
 	

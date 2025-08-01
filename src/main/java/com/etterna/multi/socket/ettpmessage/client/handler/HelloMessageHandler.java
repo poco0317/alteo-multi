@@ -29,7 +29,7 @@ public class HelloMessageHandler extends EttpMessageHandler {
 	 * Sent on connect by a client
 	 */
 	public void hello(WebSocketSession session) {
-		responder.respond(session, "hello", new HelloResponseMessage());
+		responder.respondToDirectSession(session, "hello", new HelloResponseMessage());
 	}
 	
 	@Getter @Setter

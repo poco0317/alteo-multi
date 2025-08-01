@@ -233,7 +233,7 @@ public class MultiplayerService {
 					return true;
 				} else {
 					// failed password
-					responder.respond(user.getSession(), "enterroom", new EnterRoomResponseMessage(false));
+					responder.respond(user, "enterroom", new EnterRoomResponseMessage(false));
 					responder.systemNoticeToUserInGlobalChat(user, ColorUtil.system("Incorrect password."));
 					return false;
 				}
@@ -252,12 +252,12 @@ public class MultiplayerService {
 	
 	public void sendUserListToUser(UserSession recipient) {
 		LobbyUserlistResponseMessage response = new LobbyUserlistResponseMessage(sessionService.getLoggedInSessions());
-		responder.respond(recipient.getSession(), "lobbyuserlist", response);
+		responder.respond(recipient, "lobbyuserlist", response);
 	}
 	
 	public void sendRoomListToUser(UserSession user) {
 		List<RoomDTO> roomdtos = lobbyService.getAllLobbies(true).stream().map(p -> new RoomDTO(p)).collect(Collectors.toList());
-		responder.respond(user.getSession(), "roomlist", new RoomlistResponseMessage(roomdtos));
+		responder.respond(user, "roomlist", new RoomlistResponseMessage(roomdtos));
 	}
 	
 	public void selectChart(UserSession user, StartChartMessage msg) {
