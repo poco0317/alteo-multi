@@ -8,15 +8,13 @@ import org.springframework.web.socket.WebSocketSession;
 import com.etterna.multi.socket.ettpmessage.EttpMessage;
 import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
 import com.etterna.multi.socket.ettpmessage.client.payload.HelloMessage;
+import com.etterna.util.MultiConstants;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Component
 public class HelloMessageHandler extends EttpMessageHandler {
-	
-	private static final String SERVER_NAME = "AltEOMulti";
-	private static final int SERVER_VERSION = 5;
 	
 	@Override
 	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
@@ -34,8 +32,8 @@ public class HelloMessageHandler extends EttpMessageHandler {
 	
 	@Getter @Setter
 	public class HelloResponseMessage {
-		private int version = SERVER_VERSION;
-		private String name = SERVER_NAME;
+		private int version = MultiConstants.SERVER_VERSION;
+		private String name = MultiConstants.SERVER_NAME;
 	}
 
 }
