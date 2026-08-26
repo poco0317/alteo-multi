@@ -18,4 +18,5 @@ public class StartChartMessage {
 	private Integer songoffset;
 	private Integer globaloffset;
 	private Integer rng;
+	private String mods;
 }

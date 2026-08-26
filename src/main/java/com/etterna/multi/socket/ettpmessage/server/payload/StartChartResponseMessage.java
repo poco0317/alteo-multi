@@ -10,6 +10,7 @@ public class StartChartResponseMessage {
 	private ChartDTO chart;
 	private Integer rng;
 	private String userid;
+	private String mods;
 	
 	public StartChartResponseMessage() {}
 	public StartChartResponseMessage(ChartDTO c) {
