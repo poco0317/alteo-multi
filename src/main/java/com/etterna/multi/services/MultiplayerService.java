@@ -271,6 +271,11 @@ public class MultiplayerService {
 		chart.setPickedBy(user.getUsername());
 		Lobby lobby = user.getLobby();
 		if (lobby == null) return;
+		if (user.getSpectating() != null) {
+			responder.systemNoticeToUserInRoom(user, "You can't pick a chart if you are spectating.", lobby.getName());
+			return;
+		}
+		
 		lobby.setChart(chart);
 
 		SelectChartResponseMessage response = user.getLobby().serializeChart(chart);
@@ -288,6 +293,11 @@ public class MultiplayerService {
 	
 	public void startChart(UserSession user, StartChartMessage msg) {
 		Lobby lobby = user.getLobby();
+		if (user.getSpectating() != null) {
+			responder.systemNoticeToUserInRoom(user, "You can't start a chart if you are spectating.", lobby.getName());
+			return;
+		}
+		
 		if (lobby.isCountdown()) {
 			String errors = lobby.allReady(user);
 			if (errors != null && !errors.isBlank()) {
@@ -403,7 +413,7 @@ public class MultiplayerService {
 		response.setSpectatingWho(recipient);
 		
 		responder.systemNoticeToLobby(lobby, executor.getUsername() + " is now spectating "+recipient);
-		responder.respondToLobby(lobby, "spectating_update", null);
+		responder.respondToLobby(lobby, "spectating_update", response);
 		executor.setSpectating(target);
 	}
 	
