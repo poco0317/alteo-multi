@@ -408,6 +408,11 @@ public class MultiplayerService {
 			return;
 		}
 		
+		if (target.getSpectating() != null) {
+			responder.systemNoticeToUserInRoom(executor, "You can't spectate someone who is spectating someone else.", lobby.getName());
+			return;
+		}
+		
 		SpectatingUpdateResponseMessage response = new SpectatingUpdateResponseMessage();
 		response.setWho(executor.getUsername());
 		response.setState(true);
