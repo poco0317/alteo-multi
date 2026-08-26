@@ -20,6 +20,7 @@
         </encoder>
     </appender>
     
+    <logger name="com.etterna" level="debug" />
     <root level="INFO">
     
     	<appender-ref ref="ROLLING" />
