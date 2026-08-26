@@ -124,7 +124,7 @@ public class Lobby {
 	}
 	
 	public List<UserSession> playersWhoNeedToReady(UserSession skipuser) {
-		return players.stream().filter(u -> !u.isReady() && !u.equals(skipuser)).collect(Collectors.toList());
+		return players.stream().filter(u -> !u.isReady() && u.getSpectating() == null && !u.equals(skipuser)).collect(Collectors.toList());
 	}
 	
 	public String playerListString(List<UserSession> users) {

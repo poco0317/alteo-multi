@@ -1,6 +1,7 @@
 package com.etterna.multi.socket.ettpmessage.client.handler;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
@@ -28,7 +29,8 @@ public class ReplayHolddropHandler extends EttpMessageHandler {
 		response.setData(msg);
 		response.setUserid(user.getUsername());
 		
-		responder.respondToLobby(user.getLobby(), "gameplay_replay_update", response);
+		List<UserSession> recipients = user.getSpectators();
+		responder.respondToUsers(recipients, "gameplay_replay_update", response);
 	}
 
 }

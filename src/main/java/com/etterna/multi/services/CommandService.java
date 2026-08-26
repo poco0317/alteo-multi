@@ -206,13 +206,19 @@ public class CommandService {
 	}
 	
 	@CommandAlias(values = {"spec"})
-	@HelpMessage(desc = "Toggle spectating", usage = "/spec")
+	@HelpMessage(desc = "Stop spectating or spectate a specific user", usage = "/spec [user]")
 	void cmd_spectate(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {
-			responder.systemNoticeToUserInGlobalChat(user, "No");
+			responder.systemNoticeToUserInGlobalChat(user, "You aren't in a lobby");
 			return;
 		}
-		user.toggleSpectator();
+		
+		if (data.getArgs() == null || data.getArgs().isEmpty()) {
+			multiplayer.stopSpectating(user);
+		} else {
+			String target = data.getArgs().get(0);	
+			multiplayer.enableSpectator(user, target);	
+		}
 	}
 	
 	@HelpMessage(desc = "Toggle force start for the room. Ready status is ignored", usage = "/force", requiresOper = true)

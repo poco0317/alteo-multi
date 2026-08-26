@@ -29,6 +29,7 @@ import com.etterna.multi.socket.ettpmessage.server.payload.LobbyUserlistResponse
 import com.etterna.multi.socket.ettpmessage.server.payload.RoomDTO;
 import com.etterna.multi.socket.ettpmessage.server.payload.RoomlistResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.SelectChartResponseMessage;
+import com.etterna.multi.socket.ettpmessage.server.payload.SpectatingUpdateResponseMessage;
 import com.etterna.multi.socket.ettpmessage.server.payload.StartChartResponseMessage;
 
 @Service
@@ -245,6 +246,7 @@ public class MultiplayerService {
 	public void removeFromLobby(UserSession user) {
 		Lobby lobby = lobbyService.getLobbyByUserSession(user);
 		if (lobby != null) {
+			stopSpectating(user);
 			lobbyService.removeFromLobby(user, lobby);
 			responder.systemNoticeToUserInGlobalChat(user, "Left room '"+lobby.getName()+"'");
 		}
@@ -363,6 +365,48 @@ public class MultiplayerService {
 		user.toggleFreerate();
 	}
 	
+	public void stopSpectating(UserSession user) {
+		if (user == null || user.getLobby() == null) return;
+		
+		SpectatingUpdateResponseMessage response = new SpectatingUpdateResponseMessage();
+		response.setWho(user.getUsername());
+		response.setState(false);
+		
+		responder.systemNoticeToLobby(user.getLobby(), user.getUsername() + " is no longer spectating.");
+		responder.respondToLobby(user.getLobby(), "spectating_update", response);
+		user.setSpectating(null);
+	}
+
+	public void enableSpectator(UserSession executor, String recipient) {
+		if (executor == null || executor.getLobby() == null) return;
+		Lobby lobby = executor.getLobby();
+		
+		UserSession target = sessionService.getByUsername(recipient);
+		if (target == null) {
+			responder.systemNoticeToUserInRoom(executor, "'"+recipient+"' is not online.", lobby.getName());
+			return;
+		}
+		
+		if (target.equals(executor)) {
+			responder.systemNoticeToUserInRoom(executor, "You can't spectate yourself.", lobby.getName());
+			return;
+		}
+		
+		if (target.getLobby() != lobby) {
+			responder.systemNoticeToUserInRoom(executor, "You can't spectate someone who isn't in your room.", lobby.getName());
+			return;
+		}
+		
+		SpectatingUpdateResponseMessage response = new SpectatingUpdateResponseMessage();
+		response.setWho(executor.getUsername());
+		response.setState(true);
+		response.setSpectatingWho(recipient);
+		
+		responder.systemNoticeToLobby(lobby, executor.getUsername() + " is now spectating "+recipient);
+		responder.respondToLobby(lobby, "spectating_update", null);
+		executor.setSpectating(target);
+	}
+	
 	public void updateLobbyGameplay(Lobby lobby) {
 		if (lobby == null) return;
 		
@@ -464,5 +508,4 @@ public class MultiplayerService {
 			m_logger.error("Session could not be found for session {}", session.getId());
 		}
 	}
-	
 }

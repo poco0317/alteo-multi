@@ -1,5 +1,7 @@
 package com.etterna.multi.data.state;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -50,8 +52,7 @@ public class UserSession {
 	private boolean isReady = false;
 	private Lobby lobby;
 	
-	// TODO TMP
-	private boolean isSpectating = false;
+	private UserSession spectating;
 	
 	// FIFO queue of pending websocket messages to send by worker thread(s)
 	private ConcurrentLinkedQueue<TextMessage> queuedMessages = new ConcurrentLinkedQueue<>();
@@ -76,19 +77,6 @@ public class UserSession {
 			setReady(true);
 			lobby.broadcastUserlistUpdate();
 			messaging.systemNoticeToLobby(lobby, getUsername() + " is ready.");
-		}
-	}
-	
-	public void toggleSpectator() {
-		if (getLobby() == null) return;
-		if (isSpectating()) {
-			setSpectating(false);
-			lobby.broadcastUserlistUpdate();
-			messaging.systemNoticeToLobby(lobby, getUsername() + " is not spectating.");
-		} else {
-			setSpectating(true);
-			lobby.broadcastUserlistUpdate();
-			messaging.systemNoticeToLobby(lobby, getUsername() + " is spectating.");
 		}
 	}
 	
@@ -214,6 +202,20 @@ public class UserSession {
 			return false;
 		UserSession other = (UserSession) obj;
 		return session.equals(other.session);
+	}
+
+	public List<UserSession> getSpectators() {
+		List<UserSession> o = new ArrayList<>();
+		
+		if (getLobby() != null) {
+			for (UserSession u : getLobby().getPlayers()) {
+				if (u.getSpectating() != null && u.getSpectating().getUsername() == getUsername()) {
+					o.add(u);
+				}
+			}
+		}
+		
+		return o;
 	}
 
 }
