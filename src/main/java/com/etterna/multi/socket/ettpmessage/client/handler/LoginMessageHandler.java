@@ -20,6 +20,15 @@ public class LoginMessageHandler extends EttpMessageHandler {
 	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
 		LoginMessage msg = readPayload(message, LoginMessage.class);
 		
+		if (msg.getUser().contains("@")) {
+			LoginResponseMessage response = new LoginResponseMessage();
+			response.setLogged(false);
+			response.setMsg("Dont use an email.");
+			UserSession user = sessions.get(session);
+			responder.respond(user, "login", response);
+			return;
+		}
+		
 		
 		boolean success = multiplayer.createLoginSession(msg.getUser(), msg.getPass(), session);
 		LoginResponseMessage response = new LoginResponseMessage();
