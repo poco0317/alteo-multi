@@ -205,6 +205,16 @@ public class CommandService {
 		multiplayer.toggleReady(user);
 	}
 	
+	@CommandAlias(values = {"spec"})
+	@HelpMessage(desc = "Toggle spectating", usage = "/spec")
+	void cmd_spectate(CommandData data, UserSession user) {
+		if (user.getLobby() == null) {
+			responder.systemNoticeToUserInGlobalChat(user, "No");
+			return;
+		}
+		user.toggleSpectator();
+	}
+	
 	@HelpMessage(desc = "Toggle force start for the room. Ready status is ignored", usage = "/force", requiresOper = true)
 	void cmd_force(CommandData data, UserSession user) {
 		if (user.getLobby() == null) {

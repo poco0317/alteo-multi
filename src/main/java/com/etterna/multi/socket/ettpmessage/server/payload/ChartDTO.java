@@ -15,6 +15,8 @@ public class ChartDTO {
 	private Double meter;
 	private String filehash;
 	private Integer rate;
+	private Integer songoffset;
+	private Integer globaloffset;
 	
 	@Override
 	public int hashCode() {

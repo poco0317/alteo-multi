@@ -14,6 +14,9 @@ public class SelectChartMessage {
 	private Integer rate;
 	private String difficulty;
 	private Double meter;
+	private Integer songoffset;
+	private Integer globaloffset;
+	
 	public SelectChartMessage() {}
 	public SelectChartMessage(StartChartMessage msg) {
 		title = msg.getTitle();
@@ -25,6 +28,7 @@ public class SelectChartMessage {
 		rate = msg.getRate();
 		difficulty = msg.getDifficulty();
 		meter = msg.getMeter();
-
+		songoffset = msg.getSongoffset();
+		globaloffset = msg.getGlobaloffset();
 	}
 }

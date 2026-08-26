@@ -321,6 +321,8 @@ public class MultiplayerService {
 		
 		lobbyService.startChart(lobby, chart);
 		StartChartResponseMessage response = new StartChartResponseMessage(newch);
+		response.setRng(msg.getRng());
+		response.setUserid(user.getUsername());
 		responder.respondToLobby(lobby, "startchart", response);
 		responder.systemNoticeToLobby(lobby, "Starting "+chart.getTitle());
 	}

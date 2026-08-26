@@ -28,7 +28,12 @@ public enum EttpMessageType {
 	OPENEVAL(OpenEvalMessageHandler.class),
 	CLOSEEVAL(CloseEvalMessageHandler.class),
 	LOGOUT(LogoutMessageHandler.class),
-	HELLO(HelloMessageHandler.class);
+	HELLO(HelloMessageHandler.class),
+	GAMEPLAY_JUDGMENT(GameplayJudgmentHandler.class),
+	REPLAY_INPUT(ReplayInputHandler.class),
+	REPLAY_HOLDDROP(ReplayHolddropHandler.class),
+	REPLAY_MISS(ReplayMissHandler.class),
+	REPLAY_MINEHIT(ReplayMinehitHandler.class);
 	
 	private EttpMessageType() {
 		linkedClass = null;

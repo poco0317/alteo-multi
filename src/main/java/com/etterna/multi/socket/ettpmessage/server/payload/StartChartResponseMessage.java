@@ -8,6 +8,8 @@ import lombok.Setter;
 @Getter @Setter
 public class StartChartResponseMessage {
 	private ChartDTO chart;
+	private Integer rng;
+	private String userid;
 	
 	public StartChartResponseMessage() {}
 	public StartChartResponseMessage(ChartDTO c) {

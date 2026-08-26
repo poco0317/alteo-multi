@@ -50,6 +50,9 @@ public class UserSession {
 	private boolean isReady = false;
 	private Lobby lobby;
 	
+	// TODO TMP
+	private boolean isSpectating = false;
+	
 	// FIFO queue of pending websocket messages to send by worker thread(s)
 	private ConcurrentLinkedQueue<TextMessage> queuedMessages = new ConcurrentLinkedQueue<>();
 	private boolean drainInProgress = false;
@@ -73,6 +76,19 @@ public class UserSession {
 			setReady(true);
 			lobby.broadcastUserlistUpdate();
 			messaging.systemNoticeToLobby(lobby, getUsername() + " is ready.");
+		}
+	}
+	
+	public void toggleSpectator() {
+		if (getLobby() == null) return;
+		if (isSpectating()) {
+			setSpectating(false);
+			lobby.broadcastUserlistUpdate();
+			messaging.systemNoticeToLobby(lobby, getUsername() + " is not spectating.");
+		} else {
+			setSpectating(true);
+			lobby.broadcastUserlistUpdate();
+			messaging.systemNoticeToLobby(lobby, getUsername() + " is spectating.");
 		}
 	}
 	

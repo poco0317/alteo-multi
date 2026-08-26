@@ -1,0 +1,19 @@
+package com.etterna.multi.socket.ettpmessage.client.handler;
+
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
+
+import com.etterna.multi.socket.ettpmessage.EttpMessage;
+import com.etterna.multi.socket.ettpmessage.EttpMessageHandler;
+
+@Component
+public class GameplayJudgmentHandler extends EttpMessageHandler {
+	
+	@Override
+	public void handle(WebSocketSession session, EttpMessage message) throws IOException {
+		// noop
+	}
+
+}

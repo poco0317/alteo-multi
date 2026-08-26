@@ -15,5 +15,7 @@ public class StartChartMessage {
 	private Integer rate;
 	private String difficulty;
 	private Double meter;
-	
+	private Integer songoffset;
+	private Integer globaloffset;
+	private Integer rng;
 }

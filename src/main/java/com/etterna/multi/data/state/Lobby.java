@@ -215,6 +215,8 @@ public class Lobby {
 		if (!freerate) {
 			dto.setRate(chart.getRate());
 		}
+		dto.setGlobaloffset(chart.getGlobaloffset());
+		dto.setSongoffset(chart.getSongoffset());
 		return dto;
 	}
 	
