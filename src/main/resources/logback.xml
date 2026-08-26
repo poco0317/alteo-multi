@@ -19,5 +19,11 @@
             <pattern>%-26(%d [%-5level]) %logger{35} - %msg%n</pattern>
         </encoder>
     </appender>
+    
+    <root level="INFO">
+    
+    	<appender-ref ref="ROLLING" />
+    
+    </root>
 
 </configuration>
