@@ -28,6 +28,7 @@ public class ReplayInputHandler extends EttpMessageHandler {
 		response.setSubType("input");
 		response.setData(msg);
 		response.setUserid(user.getUsername());
+		response.setSeq(message.getId());
 		
 		List<UserSession> recipients = user.getSpectators();
 		responder.respondToUsers(recipients, "gameplay_replay_update", response);

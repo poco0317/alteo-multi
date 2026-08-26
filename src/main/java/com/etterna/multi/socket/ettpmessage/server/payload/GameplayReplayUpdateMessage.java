@@ -9,5 +9,6 @@ public class GameplayReplayUpdateMessage {
 	private String subType;
 	private Object data;
 	private String userid;
+	private Long seq;
 
 }
