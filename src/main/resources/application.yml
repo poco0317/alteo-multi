@@ -3,6 +3,11 @@ server:
   tomcat:
     threads:
       max: 4
+  ssl:
+    key-alias: ${SSL_ALIAS}
+    key-store: ${SSL_KEYSTORE}
+    key-store-password: ${SSL_KEYSTORE_PASS}
+    key-password: ${SSL_PASSWORD}
 spring:
   main:
     allow-circular-references: true
